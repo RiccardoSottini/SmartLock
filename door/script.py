@@ -1,16 +1,32 @@
 from web3 import Web3
+from time import sleep
+
+import RPi.GPIO as GPIO
 import asyncio
 import json
 
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+
 class SmartDoor:
+    GPIO_LED = 17
+    GPIO_LOCK = 18
+
     def __init__(self, blockchain_url, contract_address, contract_abi):
         self.web3 = Web3(Web3.HTTPProvider(blockchain_url))
         self.contract = self.web3.eth.contract(address=contract_address, abi=contract_abi)
+        
+        GPIO.setup(self.GPIO_LED, GPIO.OUT)
+
+    def open_door(self):
+        GPIO.output(self.GPIO_LED, 1)
+        sleep(5)
+        GPIO.output(self.GPIO_LED, 0)
 
     def handle_event(self, event):
         print(Web3.to_json(event))
 
-        # TODO: continue code to open the door
+        self.open_door()
 
     async def log_loop(self, event_filter, poll_interval):
         while True:
