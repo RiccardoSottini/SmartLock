@@ -11,17 +11,23 @@ GPIO.setmode(GPIO.BCM)
 class SmartDoor:
     GPIO_LED = 17
     GPIO_LOCK = 18
+    GPIO_TIME = 5
 
     def __init__(self, blockchain_url, contract_address, contract_abi):
         self.web3 = Web3(Web3.HTTPProvider(blockchain_url))
         self.contract = self.web3.eth.contract(address=contract_address, abi=contract_abi)
         
         GPIO.setup(self.GPIO_LED, GPIO.OUT)
+        GPIO.setup(self.GPIO_LOCK, GPIO.OUT)
 
     def open_door(self):
         GPIO.output(self.GPIO_LED, 1)
-        sleep(5)
+        GPIO.output(self.GPIO_LOCK, 1)
+
+        sleep(self.GPIO_TIME)
+
         GPIO.output(self.GPIO_LED, 0)
+        GPIO.output(self.GPIO_LOCK, 1)
 
     def handle_event(self, event):
         print(Web3.to_json(event))
