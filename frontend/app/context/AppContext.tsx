@@ -121,7 +121,7 @@ const AppProvider = ({ children }) => {
       await contract.methods.access().send({
         from: wallet.accounts[0],
         value: web3.utils.toHex(0),
-        gas: web3.utils.toHex(500000)
+        gas: web3.utils.toHex(5000000)
       });
 
       refreshAccounts(wallet.accounts);

@@ -61,6 +61,10 @@ contract SmartDoor {
         return localAccesses;
     }
 
+    function isOwner() public view returns (bool) {
+        return msg.sender == owner;
+    }
+
     function reset() public payable {
         require(msg.sender == owner, "You need to be the owner of the contract");
 
