@@ -12,13 +12,14 @@ const NODE_URL = "https://rough-solitary-gas.matic-testnet.discover.quiknode.pro
 const web3 = new Web3(window.ethereum);
 const web3_scan = new Web3(NODE_URL);
 
-const contractABI = [ { "anonymous": false, "inputs": [ { "indexed": false, "internalType": "address", "name": "user", "type": "address" } ], "name": "newAccess", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": false, "internalType": "address", "name": "user", "type": "address" } ], "name": "newTicket", "type": "event" }, { "inputs": [], "name": "access", "outputs": [], "stateMutability": "payable", "type": "function" }, { "inputs": [], "name": "buy", "outputs": [], "stateMutability": "payable", "type": "function" }, { "inputs": [], "name": "reset", "outputs": [], "stateMutability": "payable", "type": "function" }, { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" }, { "inputs": [], "name": "getAccesses", "outputs": [ { "components": [ { "internalType": "uint256", "name": "timestamp", "type": "uint256" }, { "internalType": "address", "name": "user", "type": "address" } ], "internalType": "struct SmartDoor.Access[]", "name": "", "type": "tuple[]" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "hasTicket", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "view", "type": "function" } ];
-const contractAddress = '0x10A66C344FEcC69CE6D34b1E5Bd1beA3C6215cA7';
+const contractABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"user","type":"address"}],"name":"newAccess","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"user","type":"address"}],"name":"newTicket","type":"event"},{"inputs":[],"name":"access","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"buy","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"getAccesses","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"user","type":"address"}],"internalType":"struct SmartDoor.Access[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"hasTicket","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"isOwner","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"reset","outputs":[],"stateMutability":"payable","type":"function"}];
+const contractAddress = '0x6F19Bc9fa7cb0F39C19B1b0CD8bF0F33707fb8c9';
 
 export const AppContext = createContext();
 
 const AppProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true)
+  const [isOwner, setIsOwner] = useState(false)
 
   const initialState = { accounts: [], balance: "" }
   const [wallet, setWallet] = useState(initialState)
@@ -64,8 +65,15 @@ const AppProvider = ({ children }) => {
       setWallet(initialState);
     }
 
-    await getTicket(accounts);
-    await getAccesses(accounts);
+    await checkOwner(accounts);
+
+    if(isOwner) {
+
+    } else {
+      await getTicket(accounts);
+      await getAccesses(accounts);
+    }
+
     finishLoading();
   }
 
@@ -93,16 +101,26 @@ const AppProvider = ({ children }) => {
 
   const disableConnect = Boolean(wallet) && isConnecting;
 
-  const buyTicket = async () => {
-    const chainId = await web3.eth.getChainId();
+  const checkOwner = async (accounts: any) => {
+    const contract = new web3_scan.eth.Contract(contractABI, contractAddress);
 
-    if(chainId == 80001) {
+    let result : boolean = await contract.methods.isOwner().call({
+      from: accounts[0]
+    });
+
+    setIsOwner(result);
+  }
+
+  const buyTicket = async () => {
+    const chainId : bigint = await web3.eth.getChainId();
+
+    if(chainId == BigInt(80001)) {
       const contract = new web3.eth.Contract(contractABI, contractAddress);
 
       await contract.methods.buy().send({
         from: wallet.accounts[0],
         value: "0x16345785D8A0000", //0.1 ether in hexadecimal
-        gas: web3.utils.toHex(500000)
+        gas: web3.utils.toHex(5000000)
       });
 
       refreshAccounts(wallet.accounts);
@@ -113,9 +131,9 @@ const AppProvider = ({ children }) => {
   }
 
   const openDoor = async () => {
-    const chainId = await web3.eth.getChainId();
+    const chainId : bigint = await web3.eth.getChainId();
 
-    if(chainId == 80001) {
+    if(chainId == BigInt(80001)) {
       const contract = new web3.eth.Contract(contractABI, contractAddress);
 
       await contract.methods.access().send({
@@ -134,17 +152,17 @@ const AppProvider = ({ children }) => {
   const getTicket = async (accounts: any) => {
     const contract = new web3_scan.eth.Contract(contractABI, contractAddress);
 
-    let ticket = await contract.methods.hasTicket().call({
+    let result : boolean = await contract.methods.hasTicket().call({
       from: accounts[0]
     });
 
-    await setTicket(ticket);
+    await setTicket(result);
   }
 
   const getAccesses = async (accounts: any) => {
     const contract = new web3_scan.eth.Contract(contractABI, contractAddress);
 
-    let accesses = [...(await contract.methods.getAccesses().call({
+    let accesses : any = [...(await contract.methods.getAccesses().call({
       from: accounts[0]
     }))].reverse();
 
@@ -153,7 +171,7 @@ const AppProvider = ({ children }) => {
 
   return (
     <AppContext.Provider
-      value={{ isLoading, wallet, error, setError, errorMessage, handleConnect, disableConnect, accesses, buyTicket, ticket, openDoor }}
+      value={{ isLoading, wallet, error, setError, errorMessage, handleConnect, disableConnect, accesses, buyTicket, ticket, openDoor, isOwner }}
     >
       {children}
     </AppContext.Provider>

@@ -52,7 +52,7 @@ class SmartDoor:
 
 if __name__ == "__main__":
     blockchain_url = 'https://rough-solitary-gas.matic-testnet.discover.quiknode.pro/95a66b31d01626a4af842562f3d780388e4e97e9/'
-    contract_address = '0x10A66C344FEcC69CE6D34b1E5Bd1beA3C6215cA7'
+    contract_address = '0x6F19Bc9fa7cb0F39C19B1b0CD8bF0F33707fb8c9'
     contract_abi = json.loads('[ { "anonymous": false, "inputs": [ { "indexed": false, "internalType": "address", "name": "user", "type": "address" } ], "name": "newAccess", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": false, "internalType": "address", "name": "user", "type": "address" } ], "name": "newTicket", "type": "event" }, { "inputs": [], "name": "access", "outputs": [], "stateMutability": "payable", "type": "function" }, { "inputs": [], "name": "buy", "outputs": [], "stateMutability": "payable", "type": "function" }, { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" }, { "inputs": [], "name": "hasTicket", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "view", "type": "function" } ]')
 
     smartDoor = SmartDoor(blockchain_url, contract_address, contract_abi)
