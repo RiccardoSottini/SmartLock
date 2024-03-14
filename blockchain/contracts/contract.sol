@@ -38,12 +38,12 @@ contract SmartDoor {
     event newAccess(address guest);
 
     /* Function to retrieve the role of the user */
-    function getRole() public view returns (Role) {
+    function getRole() public view returns (string memory) {
         if(msg.sender == owner) {
-            return Role.OWNER;
+            return "OWNER";
         }
 
-        return Role.GUEST;
+        return "GUEST";
     }
 
     /* Function to request the authorisation - Guest functionality */
@@ -60,12 +60,20 @@ contract SmartDoor {
     }
 
     /* Function to retrieve the authorisation - Guest functionality */
-    function getAuthorisation() public view returns (Authorisation memory) {
+    function getAuthorisation() public view returns (string memory) {
         if(authorisations[msg.sender].exists && authorisations[msg.sender].status != Status.NULL) {
-            return authorisations[msg.sender];
+            Status status = authorisations[msg.sender].status;
+
+            if(status == Status.PENDING) {
+                return "PENDING";
+            } else if(status == Status.ACCEPTED) {
+                return "ACCEPTED";
+            } if(status == Status.REJECTED) {
+                return "REJECTED";
+            }
         }
 
-        return Authorisation(0, address(0x0), Status.NULL, false);
+        return "NULL";
     }
 
     /* Function to access the door - Guest functionality */

@@ -1,13 +1,17 @@
 'use client';
 
-import { useContext, useState } from "react";
-import { AppContext } from "../context/AppContext";
+import { useState, useContext } from "react";
+import { AppContext } from "../context/AppProvider";
 
 export default function Owner () {
-    const { wallet, reset, resetStatus, resetDisabled, sendTicket, sendStatus, sendDisabled } = useContext(AppContext);
+    const { wallet } = useContext(AppContext);
     const [address, setAddress] = useState("");
 
     return (
+        <></>
+    );
+
+    /*return (
         <>
             <div className="mt-2 mb-2"  style={{fontSize: "20px"}}>Logged as Owner</div>
             <div className="mt-1 mb-2" style={{fontSize: "20px"}}>Balance: {wallet.balance} MATIC</div>
@@ -33,6 +37,6 @@ export default function Owner () {
                 )}
             </>
         </>
-    );
+    );*/
 }
 

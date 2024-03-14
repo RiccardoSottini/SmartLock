@@ -1,10 +1,10 @@
 'use client';
 
 import { useContext } from "react";
-import { AppContext } from "./context/AppContext";
+import { AppContext } from "../context/AppProvider";
 
 export default function Header() {
-    const { wallet, handleConnect, disableConnect } = useContext(AppContext);
+    const { handleConnect, isConnected, isConnecting } = useContext(AppContext);
 
     return (
         <header id="navbar-main" className="navbar navbar-dark flex-column flex-md-row border-bottom">
@@ -19,8 +19,8 @@ export default function Header() {
                     <a className="nav-link ps-3 pe-3 text-dark" href="installation">Installation</a>
                 </li>
                 <li className="nav-item col-md-auto ml-1 mr-5"> 
-                {window.ethereum?.isMetaMask && wallet.accounts.length < 1 &&
-                    <a role="button" className="nav-link nav-link-button ps-3 pe-3 text-dark" disabled={disableConnect} onClick={handleConnect}>Connect Wallet</a>
+                {!isConnected &&
+                    <button className="nav-link nav-link-button ps-3 pe-3 text-dark" onClick={handleConnect} disabled={isConnecting}>Connect Wallet</button>
                 }
                 </li>
             </div>
