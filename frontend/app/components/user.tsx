@@ -10,13 +10,13 @@ export default function User () {
 
     return (
         <>
-            <div className="mt-2 mb-2">Logged as: {wallet.accounts[0]}</div>
-            <div className="mt-1 mb-2">Balance: {wallet.balance} MATIC</div>
+            <div className="mt-2 mb-2" style={{fontSize: "20px"}}>Logged as: {wallet.accounts[0]}</div>
+            <div className="mt-1 mb-2" style={{fontSize: "20px"}}>Balance: {wallet.balance} MATIC</div>
             <div className="mt-3">
                 { ticket ? (
-                <button type="button" className="btn btn-light border px-3 py-2" onClick={() => openDoor()}>Open Door</button>
+                    <button type="button" className="btn btn-light border px-3 py-2" onClick={() => openDoor()}>Open Door</button>
                 ) : (
-                <button type="button" className="btn btn-light border px-3 py-2" onClick={() => buyTicket()}>Buy Ticket for 0.1 MATIC</button>
+                    <button type="button" className="btn btn-light border px-3 py-2" onClick={() => buyTicket()}>Buy Ticket for 0.1 MATIC</button>
                 )}
             </div>
             { ticket ? (

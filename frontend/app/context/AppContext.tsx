@@ -12,8 +12,8 @@ const NODE_URL = "https://rough-solitary-gas.matic-testnet.discover.quiknode.pro
 const web3 = new Web3(window.ethereum);
 const web3_scan = new Web3(NODE_URL);
 
-const contractABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"user","type":"address"}],"name":"newAccess","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"user","type":"address"}],"name":"newTicket","type":"event"},{"inputs":[],"name":"access","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"buy","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"getAccesses","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"user","type":"address"}],"internalType":"struct SmartDoor.Access[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"hasTicket","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"isOwner","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"reset","outputs":[],"stateMutability":"payable","type":"function"}];
-const contractAddress = '0x6F19Bc9fa7cb0F39C19B1b0CD8bF0F33707fb8c9';
+const contractABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"user","type":"address"}],"name":"newAccess","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"user","type":"address"}],"name":"newTicket","type":"event"},{"inputs":[],"name":"access","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"buy","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"getAccesses","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"user","type":"address"}],"internalType":"struct SmartDoor.Access[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"hasTicket","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"isOwner","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"reset","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"recipient","type":"address"}],"name":"sendTicket","outputs":[],"stateMutability":"payable","type":"function"}];
+const contractAddress = '0x8E543C6f2c68Ebabcc8F496149F8827684b69A6b';
 
 export const AppContext = createContext();
 
@@ -26,6 +26,12 @@ const AppProvider = ({ children }) => {
 
   const [ticket, setTicket] = useState(false);
   const [accesses, setAccesses] = useState([]);
+
+  const [resetStatus, setResetStatus] = useState(false);
+  const [resetDisabled, setResetDisabled] = useState(false);
+
+  const [sendStatus, setSendStatus] = useState(false);
+  const [sendDisabled, setSendDisabled] = useState(false);
 
   const [isConnecting, setIsConnecting] = useState(false)
   const [error, setError] = useState(false)        
@@ -169,9 +175,57 @@ const AppProvider = ({ children }) => {
     await setAccesses(accesses);
   }
 
+  const reset = async () => {
+    const chainId : bigint = await web3.eth.getChainId();
+
+    if(chainId == BigInt(80001)) {
+      const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+      await setResetDisabled(true);
+
+      let result : boolean = await contract.methods.reset().send({
+        from: wallet.accounts[0],
+        value: web3.utils.toHex(0),
+        gas: web3.utils.toHex(5000000)
+      });
+
+      refreshAccounts(wallet.accounts);
+      
+      await setResetStatus(result);
+      setTimeout(() => setResetDisabled(false), 10000);
+    } else {
+      setError(true);
+      setErrorMessage("Change network to reset the contract");
+    }
+  }
+
+  const sendTicket = async (address: any) => {
+    const chainId : bigint = await web3.eth.getChainId();
+
+    if(chainId == BigInt(80001)) {
+      const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+      await setSendDisabled(true);
+
+      let result : boolean = await contract.methods.sendTicket(address).send({
+        from: wallet.accounts[0],
+        value: web3.utils.toHex(0),
+        gas: web3.utils.toHex(5000000)
+      });
+
+      refreshAccounts(wallet.accounts);
+      
+      await setSendStatus(result);
+      setTimeout(() => setSendDisabled(false), 10000);
+    } else {
+      setError(true);
+      setErrorMessage("Change network to send a ticket");
+    }
+  }
+
   return (
     <AppContext.Provider
-      value={{ isLoading, wallet, error, setError, errorMessage, handleConnect, disableConnect, accesses, buyTicket, ticket, openDoor, isOwner }}
+      value={{ isLoading, wallet, error, setError, errorMessage, handleConnect, disableConnect, accesses, buyTicket, ticket, openDoor, isOwner, reset, resetStatus, resetDisabled, sendTicket, sendStatus, sendDisabled }}
     >
       {children}
     </AppContext.Provider>

@@ -65,12 +65,27 @@ contract SmartDoor {
         return msg.sender == owner;
     }
 
-    function reset() public payable {
+    function reset() public payable returns (bool) {
         require(msg.sender == owner, "You need to be the owner of the contract");
 
         for(uint index = 0; index < users.length; index++) {
             tickets[users[index]] = Ticket(0, address(0x0), false);
             delete accesses[users[index]];
         }
+
+        return true;
+    }
+
+    function sendTicket(address recipient) public payable {
+        require(msg.sender == owner, "You need to be the owner of the contract");
+        require(tickets[recipient].exists == false, "The address already has a ticket");
+
+        (bool success,) = owner.call{value: msg.value}("");
+        require(success, "Failed to buy the ticket");
+
+        tickets[recipient] = Ticket(block.timestamp, recipient, true);
+        users.push(recipient);
+
+        emit newTicket(recipient);
     }
 }
