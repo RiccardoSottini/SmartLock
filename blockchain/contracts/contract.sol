@@ -96,17 +96,30 @@ contract SmartDoor {
         return localAccesses;
     }
 
+    /* Function to get all the data - Owner functionality */
+    function getData() public view returns (Authorisation[] memory) {
+        uint count = guests.length;
+        Authorisation[] memory localAuthorisations = new Authorisation[](count);
+
+        for (uint index = 0; index < count; index++) {
+            localAuthorisations[index] = authorisations[guests[index]];
+        }
+
+        return localAuthorisations;
+    }
+
     /* Function to reset the data stored in the contract - Owner functionality */
-    function reset() public payable returns (bool) {
+    function reset() public payable {
         require(msg.sender == owner, "You need to be the owner of the contract");
 
         for(uint index = 0; index < guests.length; index++) {
-            authorisations[guests[index]] = Authorisation(0, address(0x0), Status.NULL, false);
+            delete authorisations[guests[index]];
             delete accesses[guests[index]];
         }
 
+        delete guests;
+
         emit newReset();
-        return true;
     }
 
     /*function sendTicket(address recipient) public payable {

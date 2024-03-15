@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useContext } from "react";
-import { GuestContext, Status } from "../context/GuestProvider";
+import { GuestContext } from "../context/GuestProvider";
+import { Status } from "../context/AppProvider";
 import Access from "./access";
 
 export default function Guest () {
     const { authorisation, requestAuthorisation  } = useContext(GuestContext);
 
-    if(authorisation?.status == Status.NULL) {
+    if(authorisation.status == Status.NULL) {
         return (
             <p className="text-center mt-4" style={{fontSize: "18px"}}>
                 <button type="button" className="btn btn-light border px-3 py-2" onClick={requestAuthorisation}>Request Authorisation</button>
@@ -15,11 +16,11 @@ export default function Guest () {
         )
     } 
     
-    if(authorisation?.status == Status.PENDING || authorisation?.status == Status.REJECTED) {
+    if(authorisation.status == Status.PENDING || authorisation.status == Status.REJECTED) {
         return (
             <>
                 <p className="text-center mt-4" style={{fontSize: "18px"}}>
-                    {authorisation?.status == Status.PENDING ? (
+                    {authorisation.status == Status.PENDING ? (
                         <span>You have a pending request of authorisation</span>
                     ) : (
                         <span>Your authorisation request has been rejected</span>
@@ -27,7 +28,7 @@ export default function Guest () {
                 </p>
                 <p className="text-center mt-0" style={{fontSize: "18px"}}>
                     <span>Requested on </span>
-                    { new Intl.DateTimeFormat('en-GB', {year: 'numeric', month: '2-digit',day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit'}).format(parseInt(authorisation?.timestamp) * 1000)}
+                    { new Intl.DateTimeFormat('en-GB', {year: 'numeric', month: '2-digit',day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit'}).format(parseInt(authorisation.timestamp) * 1000)}
                 </p>
             </>
         )

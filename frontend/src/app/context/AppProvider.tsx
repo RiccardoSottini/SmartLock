@@ -11,9 +11,22 @@ declare global {
   }
 }
 
-const CONTRACT_ADDRESS = "0x3A5cea4c5035225d74bd41138F916e16D8E80782";
-const CONTRACT_ABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"acceptedAuthorisation","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"newAccess","type":"event"},{"anonymous":false,"inputs":[],"name":"newReset","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"pendingAuthorisation","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"rejectedAuthorisation","type":"event"},{"inputs":[],"name":"accessDoor","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"getAccesses","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"guest","type":"address"}],"internalType":"struct SmartDoor.Access[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getAuthorisation","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"guest","type":"address"},{"internalType":"enum SmartDoor.Status","name":"status","type":"uint8"},{"internalType":"bool","name":"exists","type":"bool"}],"internalType":"struct SmartDoor.Authorisation","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getRole","outputs":[{"internalType":"enum SmartDoor.Role","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"requestAuthorisation","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"reset","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"payable","type":"function"}];
+const CONTRACT_ADDRESS = "0x452f52720cA3c36ad96b4BA9b8cA5f7f70eE175B";
+const CONTRACT_ABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"acceptedAuthorisation","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"newAccess","type":"event"},{"anonymous":false,"inputs":[],"name":"newReset","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"pendingAuthorisation","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"rejectedAuthorisation","type":"event"},{"inputs":[],"name":"accessDoor","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"getAccesses","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"guest","type":"address"}],"internalType":"struct SmartDoor.Access[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getAuthorisation","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"guest","type":"address"},{"internalType":"enum SmartDoor.Status","name":"status","type":"uint8"},{"internalType":"bool","name":"exists","type":"bool"}],"internalType":"struct SmartDoor.Authorisation","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getData","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"guest","type":"address"},{"internalType":"enum SmartDoor.Status","name":"status","type":"uint8"},{"internalType":"bool","name":"exists","type":"bool"}],"internalType":"struct SmartDoor.Authorisation[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getRole","outputs":[{"internalType":"enum SmartDoor.Role","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"requestAuthorisation","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"reset","outputs":[],"stateMutability":"payable","type":"function"}];
 const WEB3_PROVIDER = "wss://rough-solitary-gas.matic-testnet.quiknode.pro/95a66b31d01626a4af842562f3d780388e4e97e9/"
+
+export enum Status {
+  NULL = 0,
+  PENDING = 1, 
+  ACCEPTED = 2, 
+  REJECTED = 3
+}
+
+export type Authorisation = {
+  timestamp: string;
+  guest: string;
+  status: Status;
+}
 
 export type Blockchain = {
   web3_send: any;
@@ -34,22 +47,35 @@ export enum Role {
 }
 
 export type AppContextType = {
-  isConnected: boolean;
   isLoading: boolean;
+  isConnected: boolean;
   isConnecting: boolean;
   error: boolean;
   errorMessage: string;
   setError: Dispatch<SetStateAction<boolean>>;
   setErrorMessage: Dispatch<SetStateAction<string>>;
   
-  blockchain: Partial<Blockchain>;
+  blockchain: Blockchain;
   wallet: Wallet;
   role: Role;
   connectWallet: () => void;
   refreshWallet: () => void;
 };
 
-export const AppContext = createContext<Partial<AppContextType>>({});
+export const AppContext = createContext<AppContextType>({
+  isLoading: true,
+  isConnected: false,
+  isConnecting: false,
+  error: false,
+  errorMessage: "",
+  setError: () => {},
+  setErrorMessage: () => {},
+  blockchain: { web3_send: null, web3_fetch: null, contract_send: null, contract_fetch: null },
+  wallet: { account: "", balance: "" },
+  role: Role.NULL,
+  connectWallet: () => {},
+  refreshWallet: () => {}
+});
 
 interface AppProviderProps {
   children: React.ReactNode;
@@ -63,7 +89,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [error, setError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");  
 
-  const [blockchain, setBlockchain] = useState<Partial<Blockchain>>();
+  const [blockchain, setBlockchain] = useState<Blockchain>({ web3_send: null, web3_fetch: null, contract_send: null, contract_fetch: null });
   const [wallet, setWallet] = useState<Wallet>({ account: "", balance: "" });
   const [role, setRole] = useState<Role>(Role.NULL);
 
@@ -72,7 +98,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    if(blockchain) {
+    if(blockchain.web3_send != null && blockchain.web3_fetch != null) {
       setupProvider();
 
       return () => {
@@ -116,7 +142,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   }
 
   const updateWallet = async (account: any) => {
-    const balance = formatBalance(await blockchain?.web3_fetch.eth.getBalance(account, 'latest'));
+    const balance = formatBalance(await blockchain.web3_fetch.eth.getBalance(account, 'latest'));
 
     getRole(account);
     setWallet({ account: account, balance: balance });
@@ -145,7 +171,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   }
 
   const getRole = async (account: any) => {
-    let result : Role = await blockchain?.contract_fetch.methods.getRole().call({
+    let result : Role = await blockchain.contract_fetch.methods.getRole().call({
       from: account
     });
 
@@ -154,12 +180,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   }
 
   const formatBalance = (rawBalance: bigint) => {
-    return blockchain?.web3_fetch.utils.fromWei(rawBalance, 'ether');
+    return blockchain.web3_fetch.utils.fromWei(rawBalance, 'ether');
   }
 
   const contextValue: AppContextType = {
-    isConnected,
     isLoading,
+    isConnected,
     isConnecting,
     error,
     errorMessage,

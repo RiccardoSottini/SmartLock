@@ -32,8 +32,8 @@ export default function Home() {
                     <span>Logged as: </span>
                     {role == Role.GUEST ? "Guest" : (role == Role.OWNER ? "Owner" : "")}
                   </div>
-                  <div className="mt-1 mb-2" style={{fontSize: "20px"}}>Address: {wallet?.account}</div>
-                  <div className="mt-1 mb-2" style={{fontSize: "20px"}}>Balance: {wallet?.balance} Polygon (MATIC)</div>
+                  <div className="mt-1 mb-2" style={{fontSize: "20px"}}>Address: {wallet.account}</div>
+                  <div className="mt-1 mb-2" style={{fontSize: "20px"}}>Balance: {wallet.balance} Polygon (MATIC)</div>
                   { role == Role.GUEST ? (
                     <GuestProvider>
                       <Guest/>
