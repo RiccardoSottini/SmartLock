@@ -36,6 +36,7 @@ contract SmartDoor {
     event rejectedAuthorisation(address guest);
 
     event newAccess(address guest);
+    event newReset();
 
     /* Function to retrieve the role of the user */
     function getRole() public view returns (Role) {
@@ -65,7 +66,7 @@ contract SmartDoor {
             return authorisations[msg.sender];
         }
 
-        return Authorisation(0, msg.sender, Status.NULL, false);
+        return Authorisation(0, address(0x0), Status.NULL, false);
     }
 
     /* Function to access the door - Guest functionality */
@@ -95,18 +96,20 @@ contract SmartDoor {
         return localAccesses;
     }
 
-    /*function reset() public payable returns (bool) {
+    /* Function to reset the data stored in the contract - Owner functionality */
+    function reset() public payable returns (bool) {
         require(msg.sender == owner, "You need to be the owner of the contract");
 
-        for(uint index = 0; index < users.length; index++) {
-            tickets[users[index]] = Ticket(0, address(0x0), false);
-            delete accesses[users[index]];
+        for(uint index = 0; index < guests.length; index++) {
+            authorisations[guests[index]] = Authorisation(0, address(0x0), Status.NULL, false);
+            delete accesses[guests[index]];
         }
 
+        emit newReset();
         return true;
     }
 
-    function sendTicket(address recipient) public payable {
+    /*function sendTicket(address recipient) public payable {
         require(msg.sender == owner, "You need to be the owner of the contract");
         require(tickets[recipient].exists == false, "The address already has a ticket");
 

@@ -11,19 +11,19 @@ declare global {
   }
 }
 
-const CONTRACT_ADDRESS = "0xE014766b2aEA9550b0bBDe10e530A0E402f40C8e";
-const CONTRACT_ABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"acceptedAuthorisation","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"newAccess","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"pendingAuthorisation","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"rejectedAuthorisation","type":"event"},{"inputs":[],"name":"accessDoor","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"getAccesses","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"guest","type":"address"}],"internalType":"struct SmartDoor.Access[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getAuthorisation","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"guest","type":"address"},{"internalType":"enum SmartDoor.Status","name":"status","type":"uint8"},{"internalType":"bool","name":"exists","type":"bool"}],"internalType":"struct SmartDoor.Authorisation","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getRole","outputs":[{"internalType":"enum SmartDoor.Role","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"requestAuthorisation","outputs":[],"stateMutability":"payable","type":"function"}];
-const WEB3_PROVIDER = "https://rough-solitary-gas.matic-testnet.discover.quiknode.pro/95a66b31d01626a4af842562f3d780388e4e97e9/"
+const CONTRACT_ADDRESS = "0x3A5cea4c5035225d74bd41138F916e16D8E80782";
+const CONTRACT_ABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"acceptedAuthorisation","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"newAccess","type":"event"},{"anonymous":false,"inputs":[],"name":"newReset","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"pendingAuthorisation","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"rejectedAuthorisation","type":"event"},{"inputs":[],"name":"accessDoor","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"getAccesses","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"guest","type":"address"}],"internalType":"struct SmartDoor.Access[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getAuthorisation","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"guest","type":"address"},{"internalType":"enum SmartDoor.Status","name":"status","type":"uint8"},{"internalType":"bool","name":"exists","type":"bool"}],"internalType":"struct SmartDoor.Authorisation","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getRole","outputs":[{"internalType":"enum SmartDoor.Role","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"requestAuthorisation","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"reset","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"payable","type":"function"}];
+const WEB3_PROVIDER = "wss://rough-solitary-gas.matic-testnet.quiknode.pro/95a66b31d01626a4af842562f3d780388e4e97e9/"
 
-let web3 : Web3, web3_scan : Web3;
-web3_scan = new Web3(WEB3_PROVIDER);
-
-if(typeof window != "undefined" && typeof window.ethereum != "undefined") {
-  web3 = new Web3(window.ethereum);
+export type Blockchain = {
+  web3_send: any;
+  web3_fetch: any;
+  contract_send: any;
+  contract_fetch: any;
 }
 
-export type WalletType = {
-  accounts: any[];
+export type Wallet = {
+  account: string;
   balance: string;
 };
 
@@ -33,32 +33,20 @@ export enum Role {
   GUEST = 2
 }
 
-export enum Status {
-  NULL = 0,
-  PENDING = 1, 
-  ACCEPTED = 2, 
-  REJECTED = 3
-}
-
-export type Authorisation = {
-  timestamp: bigint;
-  guest: string;
-  status: Status;
-}
-
 export type AppContextType = {
-  handleConnect: () => void;
   isConnected: boolean;
   isLoading: boolean;
   isConnecting: boolean;
-  wallet: WalletType;
-  role: Role;
-  authorisation: Authorisation;
-  requestAuthorisation: () => void;
   error: boolean;
   errorMessage: string;
   setError: Dispatch<SetStateAction<boolean>>;
   setErrorMessage: Dispatch<SetStateAction<string>>;
+  
+  blockchain: Partial<Blockchain>;
+  wallet: Wallet;
+  role: Role;
+  connectWallet: () => void;
+  refreshWallet: () => void;
 };
 
 export const AppContext = createContext<Partial<AppContextType>>({});
@@ -68,151 +56,121 @@ interface AppProviderProps {
 }
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
-  const [isConnected, setConnected] = useState<boolean>(false);
-  
   const [isLoading, setLoading] = useState<boolean>(true);
+  const [isConnected, setConnected] = useState<boolean>(false);
   const [isConnecting, setConnecting] = useState<boolean>(false);
 
-  const [wallet, setWallet] = useState<WalletType>({ accounts: [], balance: '' });
-  const [role, setRole] = useState<Role>(Role.NULL);
-  const [authorisation, setAuthorisation] = useState<Authorisation>({timestamp: BigInt(0), guest: "", status: Status.NULL});
-  
   const [error, setError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");  
 
-  useEffect(() => {
-    getProvider();
+  const [blockchain, setBlockchain] = useState<Partial<Blockchain>>();
+  const [wallet, setWallet] = useState<Wallet>({ account: "", balance: "" });
+  const [role, setRole] = useState<Role>(Role.NULL);
 
-    return () => {
-      window.ethereum?.removeListener('accountsChanged', refreshAccounts);
-    }
+  useEffect(() => {
+    setupBlockchain();
   }, []);
 
   useEffect(() => {
-    if(role != Role.NULL) {
-      if(role == Role.GUEST) {
-        getAuthorisation(wallet.accounts);
+    if(blockchain) {
+      setupProvider();
+
+      return () => {
+        window.ethereum?.removeListener('accountsChanged', updateAccounts);
       }
     }
-  }, [role]);
+  }, [blockchain]);
 
-  useEffect(() => {
-    finishLoading();
-  }, [authorisation]);
+  const setupBlockchain = async () => {
+    const web3_send = new Web3(window.ethereum);
+    const web3_fetch = new Web3(WEB3_PROVIDER);
 
-  const getProvider = async () => {
+    setBlockchain({
+      web3_send: web3_send,
+      web3_fetch: web3_fetch, 
+      contract_send: new web3_send.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS),
+      contract_fetch: new web3_fetch.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS)
+    });
+  }
+
+  const setupProvider = async () => {
     const provider = await detectEthereumProvider({ silent: true });
 
     if (provider) {
-      const accounts = await window.ethereum?.request(
-        { method: 'eth_accounts' }
-      );
+      const accounts = await window.ethereum?.request({ method: 'eth_accounts' });
+      updateAccounts(accounts);
 
-      refreshAccounts(accounts);
-      window.ethereum?.on('accountsChanged', refreshAccounts);
-    } else {
-      finishLoading();
+      window.ethereum?.on('accountsChanged', updateAccounts);
     }
   }
 
-  const refreshAccounts = async (accounts: any) => {
+  const updateAccounts = async (accounts: any) => {
     if (accounts.length > 0) {
-      updateWallet(accounts);
+      updateWallet(accounts[0]);
     } else {
-      setWallet({accounts: [], balance: ""});
+      setWallet({ account: "", balance: "" });
       setConnected(false);
     }
 
-    getRole(accounts);
-  }
-
-  const finishLoading = () => {
     setTimeout(() => setLoading(false), 1000);
   }
 
-  const updateWallet = async (accounts: any) => {
-    const balance = formatBalance(await web3_scan.eth.getBalance(accounts[0], 'latest'));
+  const updateWallet = async (account: any) => {
+    const balance = formatBalance(await blockchain?.web3_fetch.eth.getBalance(account, 'latest'));
 
-    setWallet({ accounts : accounts, balance: balance });
-    setConnected(true);
+    getRole(account);
+    setWallet({ account: account, balance: balance });
   }
 
-  const formatBalance = (rawBalance: bigint) => {
-    return web3_scan.utils.fromWei(rawBalance, 'ether');
+  const refreshWallet = () => {
+    if(wallet) {
+      updateWallet(wallet.account);
+    }
   }
 
-  const handleConnect = async () => {                  
+  const connectWallet = async () => {                  
     setConnecting(true); 
 
     await window.ethereum?.request({                    
       method: "eth_requestAccounts"
-    }).then((accounts: any) => {                        
-      setError(false)                                   
-      refreshAccounts(accounts)                           
-    }).catch((err:any) => {                              
-      setError(true)                                    
-      setErrorMessage(err.message)                      
+    }).then((accounts : any) => {                        
+      setError(false);                                   
+      updateAccounts(accounts);                           
+    }).catch((err : any) => {                              
+      setError(true);                                    
+      setErrorMessage(err.message);                      
     });    
 
-    setConnecting(true); 
+    setConnecting(false); 
   }
 
-  const getRole = async (accounts: any) => {
-    const contract = new web3_scan.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
-
-    let result : number = await contract.methods.getRole().call({
-      from: accounts[0]
+  const getRole = async (account: any) => {
+    let result : Role = await blockchain?.contract_fetch.methods.getRole().call({
+      from: account
     });
 
-    setRole(result as Role);
+    setRole(result);
+    setConnected(true);
   }
 
-  const getAuthorisation = async (accounts: any) => {
-    const contract = new web3_scan.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
-
-    let result : Authorisation = await contract.methods.getAuthorisation().call({
-      from: accounts[0]
-    });
-
-    setAuthorisation({
-      timestamp: result.timestamp,
-      guest: result.guest,
-      status: Number(result.status) as Status
-    } as Authorisation);
-  }
-
-  const requestAuthorisation = async () => {
-    const chainId : bigint = await web3.eth.getChainId();
-
-    if(chainId == BigInt(80001)) {
-      const contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
-
-      await contract.methods.requestAuthorisation().send({
-        from: wallet.accounts[0],
-        gas: web3.utils.toHex(5000000)
-      });
-
-      getAuthorisation(wallet.accounts);
-      refreshAccounts(wallet.accounts);
-    } else {
-      setError(true);
-      setErrorMessage("Change network to request the authorisation");
-    }
+  const formatBalance = (rawBalance: bigint) => {
+    return blockchain?.web3_fetch.utils.fromWei(rawBalance, 'ether');
   }
 
   const contextValue: AppContextType = {
-    handleConnect,
     isConnected,
     isLoading,
     isConnecting,
-    wallet,
-    role,
-    authorisation,
-    requestAuthorisation,
     error,
     errorMessage,
     setError,
-    setErrorMessage
+    setErrorMessage,
+
+    blockchain,
+    wallet,
+    role,
+    connectWallet,
+    refreshWallet
   };
 
   return (

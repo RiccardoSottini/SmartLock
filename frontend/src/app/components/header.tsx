@@ -4,7 +4,7 @@ import { useContext } from "react";
 import { AppContext } from "../context/AppProvider";
 
 export default function Header() {
-    const { handleConnect, isConnected, isConnecting } = useContext(AppContext);
+    const { connectWallet, isConnected, isConnecting } = useContext(AppContext);
 
     return (
         <header id="navbar-main" className="navbar navbar-dark flex-column flex-md-row border-bottom">
@@ -19,9 +19,7 @@ export default function Header() {
                     <a className="nav-link ps-3 pe-3 text-dark" href="installation">Installation</a>
                 </li>
                 <li className="nav-item col-md-auto ml-1 mr-5"> 
-                {!isConnected &&
-                    <button className="nav-link nav-link-button ps-3 pe-3 text-dark" onClick={handleConnect} disabled={isConnecting}>Connect Wallet</button>
-                }
+                {!isConnected && (<button className="nav-link nav-link-button ps-3 pe-3 text-dark" onClick={connectWallet} disabled={isConnecting}>Connect Wallet</button>)}
                 </li>
             </div>
         </header>

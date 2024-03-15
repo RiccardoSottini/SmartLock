@@ -8,16 +8,18 @@ import Header from './components/header';
 import Owner from './components/owner';
 import Guest from './components/guest';
 
+import { GuestProvider } from './context/GuestProvider';
+import { OwnerProvider } from './context/OwnerProvider';
+
 export default function Home() {
   const { isConnected, isLoading, wallet, role, error, setError, errorMessage } = useContext(AppContext);
-  const styleSpinner : any = {position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)"};
 
   return (
     <>
       <Header/>
       <div className="ml-5 mr-5 my-3 text-center" style={{height: "calc(100% - 100px)"}}>
         { isLoading ? (
-          <FontAwesomeIcon icon={faSpinner} size="2x" spin style={styleSpinner}/>
+          <FontAwesomeIcon icon={faSpinner} size="2x" spin style={{position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)"}}/>
         ) : (
           error ? ( 
               <p onClick={() => setError && setError(false)} style={{fontSize: "18px"}} role="button">
@@ -30,13 +32,17 @@ export default function Home() {
                     <span>Logged as: </span>
                     {role == Role.GUEST ? "Guest" : (role == Role.OWNER ? "Owner" : "")}
                   </div>
-                  <div className="mt-1 mb-2" style={{fontSize: "20px"}}>Address: {wallet?.accounts[0]}</div>
+                  <div className="mt-1 mb-2" style={{fontSize: "20px"}}>Address: {wallet?.account}</div>
                   <div className="mt-1 mb-2" style={{fontSize: "20px"}}>Balance: {wallet?.balance} Polygon (MATIC)</div>
                   { role == Role.GUEST ? (
-                    <Guest/>
+                    <GuestProvider>
+                      <Guest/>
+                    </GuestProvider>
                   ) : (
                     role == Role.OWNER ? (
-                      <Owner/>
+                      <OwnerProvider>
+                        <Owner/>
+                      </OwnerProvider>
                     ) : (
                       <></>
                     )

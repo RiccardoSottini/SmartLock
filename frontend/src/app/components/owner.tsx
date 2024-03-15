@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useContext } from "react";
-import { AppContext } from "../context/AppProvider";
+import { useContext } from "react";
+import { OwnerContext } from "../context/OwnerProvider";
 
 export default function Owner () {
-    const { wallet } = useContext(AppContext);
-    const [address, setAddress] = useState("");
+    const { reset } = useContext(OwnerContext);
 
     return (
-        <></>
+        <p className="text-center mt-4" style={{fontSize: "18px"}}>
+            <button type="button" className="btn btn-light border px-3 py-2" onClick={reset}>Reset Contract</button>
+        </p>
     );
 
     /*return (
