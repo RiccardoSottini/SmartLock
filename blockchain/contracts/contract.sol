@@ -2,7 +2,7 @@ pragma solidity ^0.8.18;
 
 contract SmartDoor {
     /* Enumeration with the roles of the user */
-    enum Role { OWNER, GUEST }
+    enum Role { NULL, OWNER, GUEST }
 
     /* Enumeration with the statuses of the authorisation */
     enum Status { NULL, PENDING, ACCEPTED, REJECTED }
@@ -38,12 +38,12 @@ contract SmartDoor {
     event newAccess(address guest);
 
     /* Function to retrieve the role of the user */
-    function getRole() public view returns (string memory) {
+    function getRole() public view returns (Role) {
         if(msg.sender == owner) {
-            return "OWNER";
+            return Role.OWNER;
         }
 
-        return "GUEST";
+        return Role.GUEST;
     }
 
     /* Function to request the authorisation - Guest functionality */
@@ -60,20 +60,12 @@ contract SmartDoor {
     }
 
     /* Function to retrieve the authorisation - Guest functionality */
-    function getAuthorisation() public view returns (string memory) {
+    function getAuthorisation() public view returns (Authorisation memory) {
         if(authorisations[msg.sender].exists && authorisations[msg.sender].status != Status.NULL) {
-            Status status = authorisations[msg.sender].status;
-
-            if(status == Status.PENDING) {
-                return "PENDING";
-            } else if(status == Status.ACCEPTED) {
-                return "ACCEPTED";
-            } if(status == Status.REJECTED) {
-                return "REJECTED";
-            }
+            return authorisations[msg.sender];
         }
 
-        return "NULL";
+        return Authorisation(0, msg.sender, Status.NULL, false);
     }
 
     /* Function to access the door - Guest functionality */

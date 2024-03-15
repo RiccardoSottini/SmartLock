@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useContext } from 'react';
-import { AppContext } from './context/AppProvider';
+import { AppContext, Role } from './context/AppProvider';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSpinner } from '@fortawesome/free-solid-svg-icons'
 import Header from './components/header';
@@ -26,13 +26,16 @@ export default function Home() {
             ) : (
               isConnected ? (
                 <>
-                  <div className="mt-2 mb-2" style={{fontSize: "20px", fontWeight: "bold"}}>Logged as: {role.charAt(0).toUpperCase() + role?.toLowerCase().slice(1)}</div>
-                  <div className="mt-1 mb-2" style={{fontSize: "20px"}}>Address: {wallet.accounts[0]}</div>
-                  <div className="mt-1 mb-2" style={{fontSize: "20px"}}>Balance: {wallet.balance} Polygon (MATIC)</div>
-                  { role == "GUEST" ? (
+                  <div className="mt-2 mb-2" style={{fontSize: "20px", fontWeight: "bold"}}>
+                    <span>Logged as: </span>
+                    {role == Role.GUEST ? "Guest" : (role == Role.OWNER ? "Owner" : "")}
+                  </div>
+                  <div className="mt-1 mb-2" style={{fontSize: "20px"}}>Address: {wallet?.accounts[0]}</div>
+                  <div className="mt-1 mb-2" style={{fontSize: "20px"}}>Balance: {wallet?.balance} Polygon (MATIC)</div>
+                  { role == Role.GUEST ? (
                     <Guest/>
                   ) : (
-                    role == "OWNER" ? (
+                    role == Role.OWNER ? (
                       <Owner/>
                     ) : (
                       <></>

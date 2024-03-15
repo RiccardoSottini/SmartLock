@@ -1,19 +1,19 @@
 'use client';
 
 import { useState, useContext } from "react";
-import { AppContext } from "../context/AppProvider";
+import { AppContext, Status } from "../context/AppProvider";
 import Access from "./access";
 
 export default function Guest () {
     const { wallet, authorisation, requestAuthorisation  } = useContext(AppContext);
 
-    if(authorisation == "NULL") {
+    if(authorisation?.status == Status.NULL) {
         return (
             <button type="button" className="btn btn-light border px-3 py-2" onClick={requestAuthorisation}>Request Authorisation</button>
         )
     } 
     
-    if(authorisation == "PENDING") {
+    if(authorisation?.status == Status.PENDING) {
         return (
             <p className="text-center mt-3" style={{fontSize: "18px"}}>You have a pending authorisation</p>
         )

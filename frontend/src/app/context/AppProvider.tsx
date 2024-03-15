@@ -11,14 +11,15 @@ declare global {
   }
 }
 
-const CONTRACT_ADDRESS = "0xfF64D10D2a0a66629f1EC602A6137Ef76C778063"
-const CONTRACT_ABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"acceptedAuthorisation","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"newAccess","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"pendingAuthorisation","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"rejectedAuthorisation","type":"event"},{"inputs":[],"name":"accessDoor","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"getAccesses","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"guest","type":"address"}],"internalType":"struct SmartDoor.Access[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getAuthorisation","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getRole","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"requestAuthorisation","outputs":[],"stateMutability":"payable","type":"function"}];
+const CONTRACT_ADDRESS = "0xE014766b2aEA9550b0bBDe10e530A0E402f40C8e";
+const CONTRACT_ABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"acceptedAuthorisation","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"newAccess","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"pendingAuthorisation","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"rejectedAuthorisation","type":"event"},{"inputs":[],"name":"accessDoor","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"getAccesses","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"guest","type":"address"}],"internalType":"struct SmartDoor.Access[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getAuthorisation","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"guest","type":"address"},{"internalType":"enum SmartDoor.Status","name":"status","type":"uint8"},{"internalType":"bool","name":"exists","type":"bool"}],"internalType":"struct SmartDoor.Authorisation","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getRole","outputs":[{"internalType":"enum SmartDoor.Role","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"requestAuthorisation","outputs":[],"stateMutability":"payable","type":"function"}];
 const WEB3_PROVIDER = "https://rough-solitary-gas.matic-testnet.discover.quiknode.pro/95a66b31d01626a4af842562f3d780388e4e97e9/"
 
-const web3_scan = new Web3(WEB3_PROVIDER);
+let web3 : Web3, web3_scan : Web3;
+web3_scan = new Web3(WEB3_PROVIDER);
 
 if(typeof window != "undefined" && typeof window.ethereum != "undefined") {
-  const web3 = new Web3(window.ethereum);
+  web3 = new Web3(window.ethereum);
 }
 
 export type WalletType = {
@@ -27,16 +28,22 @@ export type WalletType = {
 };
 
 export enum Role {
-  NULL = "NULL",
-  OWNER = "OWNER", 
-  GUEST = "GUEST"
+  NULL = 0,
+  OWNER = 1,
+  GUEST = 2
 }
 
-export enum Authorisation {
-  NULL = "NULL",
-  PENDING = "PENDING", 
-  ACCEPTED = "ACCEPTED", 
-  REJECTED = "REJECTED"
+export enum Status {
+  NULL = 0,
+  PENDING = 1, 
+  ACCEPTED = 2, 
+  REJECTED = 3
+}
+
+export type Authorisation = {
+  timestamp: bigint;
+  guest: string;
+  status: Status;
 }
 
 export type AppContextType = {
@@ -68,7 +75,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   const [wallet, setWallet] = useState<WalletType>({ accounts: [], balance: '' });
   const [role, setRole] = useState<Role>(Role.NULL);
-  const [authorisation, setAuthorisation] = useState<Authorisation>(Authorisation.NULL);
+  const [authorisation, setAuthorisation] = useState<Authorisation>({timestamp: BigInt(0), guest: "", status: Status.NULL});
   
   const [error, setError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");  
@@ -83,15 +90,13 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   useEffect(() => {
     if(role != Role.NULL) {
-      setConnected(true);
-
-      getAuthorisation(wallet.accounts);
+      if(role == Role.GUEST) {
+        getAuthorisation(wallet.accounts);
+      }
     }
   }, [role]);
 
   useEffect(() => {
-    console.log(authorisation);
-
     finishLoading();
   }, [authorisation]);
 
@@ -115,6 +120,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       updateWallet(accounts);
     } else {
       setWallet({accounts: [], balance: ""});
+      setConnected(false);
     }
 
     getRole(accounts);
@@ -128,6 +134,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     const balance = formatBalance(await web3_scan.eth.getBalance(accounts[0], 'latest'));
 
     setWallet({ accounts : accounts, balance: balance });
+    setConnected(true);
   }
 
   const formatBalance = (rawBalance: bigint) => {
@@ -153,11 +160,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const getRole = async (accounts: any) => {
     const contract = new web3_scan.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
 
-    let result : Role = await contract.methods.getRole().call({
+    let result : number = await contract.methods.getRole().call({
       from: accounts[0]
     });
 
-    setRole(result);
+    setRole(result as Role);
   }
 
   const getAuthorisation = async (accounts: any) => {
@@ -167,7 +174,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       from: accounts[0]
     });
 
-    setAuthorisation(result);
+    setAuthorisation({
+      timestamp: result.timestamp,
+      guest: result.guest,
+      status: Number(result.status) as Status
+    } as Authorisation);
   }
 
   const requestAuthorisation = async () => {
@@ -181,6 +192,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         gas: web3.utils.toHex(5000000)
       });
 
+      getAuthorisation(wallet.accounts);
       refreshAccounts(wallet.accounts);
     } else {
       setError(true);
