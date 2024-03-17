@@ -21,3 +21,20 @@ body {
   color: rgb(var(--foreground-rgb));
   background: "white";
 }
+
+@media only screen and (max-width: 992px) {
+  .authentication_link {
+    width: 200px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: block;
+    position: relative;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  .authentication_link {
+    width: 100px;
+  }
+}

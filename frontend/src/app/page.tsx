@@ -2,8 +2,9 @@
 
 import React, { useContext } from 'react';
 import { AppContext, Role } from './context/AppProvider';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import {NextUIProvider} from "@nextui-org/react";
 import Header from './components/header';
 import Owner from './components/owner';
 import Guest from './components/guest';
@@ -15,7 +16,7 @@ export default function Home() {
   const { isConnected, isLoading, wallet, role, error, setError, errorMessage } = useContext(AppContext);
 
   return (
-    <>
+    <NextUIProvider>
       <Header/>
       <div className="ml-5 mr-5 my-3 text-center" style={{height: "calc(100% - 100px)"}}>
         { isLoading ? (
@@ -55,6 +56,6 @@ export default function Home() {
           )
         }
       </div>
-    </>
+    </NextUIProvider>
   );
 }

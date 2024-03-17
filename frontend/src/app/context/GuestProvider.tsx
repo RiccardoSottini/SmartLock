@@ -6,11 +6,13 @@ import { AppContext, Authorisation, Status } from "./AppProvider";
 export type GuestContextType = {
   authorisation: Authorisation;
   requestAuthorisation: () => void;
+  accessDoor: () => void;
 };
 
 export const GuestContext = createContext<GuestContextType>({
   authorisation: { timestamp: "", guest: "", status: Status.NULL },
-  requestAuthorisation: () => {}
+  requestAuthorisation: () => {},
+  accessDoor: () => {}
 });
 
 interface GuestProviderProps {
@@ -55,10 +57,28 @@ export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {
       blockchain.contract_send.methods.requestAuthorisation().send({
         from: wallet.account,
         gas: blockchain.web3_send.utils.toHex(5000000)
+      }).catch((error : any) => {
+        console.log(error);
       });
     } else {
       setError(true);
       setErrorMessage("Change network to request the authorisation");
+    }
+  }
+
+  const accessDoor = async () => {
+    const chainId : bigint = await blockchain.web3_send.eth.getChainId();
+
+    if(chainId == BigInt(80001)) {
+      blockchain.contract_send.methods.accessDoor().send({
+        from: wallet.account,
+        gas: blockchain.web3_send.utils.toHex(5000000)
+      }).catch((error : any) => {
+        console.log(error);
+      });
+    } else {
+      setError(true);
+      setErrorMessage("Change network to open the door");
     }
   }
 
@@ -75,6 +95,12 @@ export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {
       }
     });
 
+    blockchain.contract_fetch.events.rejectedAuthorisation().on("data", (event : any) => { 
+      if(event.returnValues.guest && event.returnValues.guest.toLowerCase() == wallet.account.toLowerCase()) {
+        refresh();
+      }
+    });
+
     blockchain.contract_fetch.events.newReset().on("data", (event : any) => { 
       refresh();
     });
@@ -83,6 +109,7 @@ export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {
   const contextValue: GuestContextType = {
     authorisation,
     requestAuthorisation,
+    accessDoor
   };
 
   return (

@@ -72,10 +72,7 @@ contract SmartDoor {
     /* Function to access the door - Guest functionality */
     function accessDoor() public payable {
         // Check if the guest has an accepted authorisation
-        require(
-            authorisations[msg.sender].exists && authorisations[msg.sender].status == Status.ACCEPTED, 
-            "You do not have an accepted authorisation to access the door"
-        );
+        require(authorisations[msg.sender].exists && authorisations[msg.sender].status == Status.ACCEPTED, "You do not have an accepted authorisation to access the door");
 
         // Register the successful access to the door
         accesses[msg.sender].push(Access(block.timestamp, msg.sender));
@@ -98,6 +95,8 @@ contract SmartDoor {
 
     /* Function to get all the data - Owner functionality */
     function getData() public view returns (Authorisation[] memory) {
+        require(msg.sender == owner, "You need to be the owner of the contract");
+
         uint count = guests.length;
         Authorisation[] memory localAuthorisations = new Authorisation[](count);
 
@@ -107,6 +106,40 @@ contract SmartDoor {
 
         return localAuthorisations;
     }
+
+    /* Function to accept an authorisation request - Owner functionality */
+    function acceptAuthorisation(address guest) public payable {
+        require(msg.sender == owner, "You need to be the owner of the contract");
+        require(authorisations[guest].exists, "The authorisation request does not exist");
+        require(authorisations[guest].exists && authorisations[guest].status != Status.ACCEPTED, "The authorisation request has already been accepted");
+
+        authorisations[guest].status = Status.ACCEPTED;
+
+        emit acceptedAuthorisation(guest);
+    }
+    
+    /* Function to reject an authorisation request - Owner functionality */
+    function rejectAuthorisation(address guest) public payable {
+        require(msg.sender == owner, "You need to be the owner of the contract");
+        require(authorisations[guest].exists, "The authorisation request does not exist");
+        require(authorisations[guest].exists && authorisations[guest].status != Status.REJECTED, "The authorisation request has already been rejected");
+
+        authorisations[guest].status = Status.REJECTED;
+
+        emit rejectedAuthorisation(guest);
+    }
+
+    /* Function to delete an authorisation request - Owner functionality */
+    /*function deleteAuthorisation(address guest) public payable {
+        require(msg.sender == owner, "You need to be the owner of the contract");
+        require(authorisations[guest].exists, "The authorisation request does not exist");
+
+        delete authorisations[guest];
+        delete accesses[guest];
+        removeGuest(guest);
+
+        emit deletedAuthorisation(guest);
+    }*/
 
     /* Function to reset the data stored in the contract - Owner functionality */
     function reset() public payable {
@@ -133,5 +166,18 @@ contract SmartDoor {
         users.push(recipient);
 
         emit newTicket(recipient);
+    }*/
+
+    /*function removeGuest(address guest) private {
+        for (uint index = 0; index < guests.length; index++) {
+            if (guests[index] == guest) {
+                for (uint j = index; j < guests.length - 1; j++) {
+                    guests[j] = guests[j + 1];
+                }
+
+                guests.pop();
+                return;
+            }
+        }
     }*/
 }
