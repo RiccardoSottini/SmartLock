@@ -107,6 +107,17 @@ contract SmartDoor {
         return localAuthorisations;
     }
 
+    /* Function to create an authorisation request - Owner functionality */
+    function createAuthorisation(address guest) public payable {
+        require(msg.sender == owner, "You need to be the owner of the contract");
+        require(!authorisations[guest].exists, "The authorisation request already exists");
+
+        authorisations[guest] = Authorisation(block.timestamp, guest, Status.ACCEPTED, true);
+        guests.push(guest);
+
+        emit acceptedAuthorisation(guest);
+    }
+
     /* Function to accept an authorisation request - Owner functionality */
     function acceptAuthorisation(address guest) public payable {
         require(msg.sender == owner, "You need to be the owner of the contract");

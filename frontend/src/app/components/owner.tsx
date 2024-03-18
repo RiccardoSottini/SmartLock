@@ -9,7 +9,7 @@ import OwnerModal from "./owner/modal";
 import OwnerTable from "./owner/table";
 
 export default function Owner () {
-    const { reset, data, acceptAuthorisation, rejectAuthorisation } = useContext(OwnerContext);
+    const { checkAddress, reset, data, createAuthorisation, acceptAuthorisation, rejectAuthorisation } = useContext(OwnerContext);
     const [rows, setRows] = useState<any>([]);
     const {isOpen, onOpen, onOpenChange} = useDisclosure();
 
@@ -31,7 +31,7 @@ export default function Owner () {
                 <button type="button" className="btn btn-light border px-3 py-2" onClick={reset}>Reset Contract</button>
             </p>
             <OwnerTable rows={rows} onOpen={onOpen} acceptAuthorisation={acceptAuthorisation} rejectAuthorisation={rejectAuthorisation}/>
-            <OwnerModal isOpen={isOpen} onOpenChange={onOpenChange} />
+            <OwnerModal checkAddress={checkAddress} rows={rows} isOpen={isOpen} onOpenChange={onOpenChange} createAuthorisation={createAuthorisation}/>
         </>
     );
 }

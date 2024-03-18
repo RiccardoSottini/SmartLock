@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Status } from "../../context/AppProvider";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsisV, faPlus, faChevronDown, faSearch } from '@fortawesome/free-solid-svg-icons';
@@ -66,10 +66,10 @@ export type OwnerTableProps = {
 };
 
 export default function OwnerTable ({rows, onOpen, acceptAuthorisation, rejectAuthorisation} : OwnerTableProps) {
-    const [filterValue, setFilterValue] = React.useState("");
-    const [statusFilter, setStatusFilter] = React.useState("all");
+    const [filterValue, setFilterValue] = useState<string>("");
+    const [statusFilter, setStatusFilter] = useState<string>("all");
 
-    const filteredRows = React.useMemo(() => {
+    const filteredRows = useMemo(() => {
         let filteredRows = [...rows];
     
         if (filterValue != "") {
@@ -88,11 +88,11 @@ export default function OwnerTable ({rows, onOpen, acceptAuthorisation, rejectAu
         return filteredRows;
     }, [rows, filterValue, statusFilter]);
 
-    const onSearchChange = React.useCallback((value : string) => {
+    const onSearchChange = useCallback((value : string) => {
         setFilterValue(value);
     }, []);
 
-    const renderCell = React.useCallback((authorisation : any, columnKey : string) => {
+    const renderCell = useCallback((authorisation : any, columnKey : string) => {
         const cellValue = authorisation[columnKey];
     
         switch (columnKey) {
@@ -158,7 +158,7 @@ export default function OwnerTable ({rows, onOpen, acceptAuthorisation, rejectAu
         }
     }, []);    
 
-    const topContent = React.useMemo(() => {
+    const topContent = useMemo(() => {
         return (
             <div className="flex flex-col gap-4">
                 <div className="flex justify-between gap-3 items-end">

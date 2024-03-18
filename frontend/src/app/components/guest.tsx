@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useContext } from "react";
+import { useContext } from "react";
 import { GuestContext } from "../context/GuestProvider";
 import { Status } from "../context/AppProvider";
-import Access from "./access";
+import Access from "./guest/access";
 
 export default function Guest () {
-    const { authorisation, requestAuthorisation, accessDoor  } = useContext(GuestContext);
+    const { authorisation, accesses, requestAuthorisation, accessDoor  } = useContext(GuestContext);
 
     const renderStatus = (status : Status) => {
         if(status == Status.PENDING) {
@@ -45,10 +45,14 @@ export default function Guest () {
                         <p className="text-center mt-3" style={{fontSize: "18px"}}>
                             <button type="button" className="btn btn-light border px-3 py-2" onClick={accessDoor}>Access the Door</button>
                         </p>
-                        <h1 className="mt-4 font-bold">Previous accesses to the door</h1>
-                        <div className="flex flex-col relative gap-4 w-full mt-2">
-                            <div className="p-4 z-0 flex flex-col relative justify-between gap-4 bg-content1 overflow-auto rounded-large shadow-small w-full">
-                                &nbsp;
+                        <h1 className="mt-4 font-bold">History of accesses to the door</h1>
+                        <div className="flex flex-col relative gap-4 w-full mt-2 pb-4">
+                            <div className="p-4 pb-0 z-0 flex flex-col relative justify-between gap-4 bg-content1 overflow-auto rounded-large shadow-small w-full">
+                                <div className="row row-cols-1 row-cols-md-3 row-cols-lg-4">
+                                    {accesses.map((access : any, index : number) => (
+                                        <Access key={index} timestamp={access.timestamp.toString()}/>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </>

@@ -1,20 +1,24 @@
 "use client"
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { AppContext, Authorisation, Status } from "./AppProvider";
+import { AppContext, Authorisation, Status, GAS_FEE } from "./AppProvider";
 
 export type OwnerContextType = {
   data: Authorisation[];
+  createAuthorisation: (guest: string) => void;
   acceptAuthorisation: (guest: string) => void;
   rejectAuthorisation: (guest: string) => void;
   reset: () => void;
+  checkAddress: (address: string) => boolean;
 };
 
 export const OwnerContext = createContext<OwnerContextType>({
   data: [],
+  createAuthorisation: (guest: string) => {},
   acceptAuthorisation: (guest: string) => {},
   rejectAuthorisation: (guest: string) => {},
-  reset: () => {}
+  reset: () => {},
+  checkAddress: (address: string) => true
 });
 
 interface OwnerProviderProps {
@@ -62,13 +66,29 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
     setData(authorisations);
   }
 
+  const createAuthorisation = async (guest: string) => {
+    const chainId : bigint = await blockchain.web3_send.eth.getChainId();
+
+    if(chainId == BigInt(80001)) {
+      blockchain.contract_send.methods.createAuthorisation(guest).send({
+        from: wallet.account,
+        gas: blockchain.web3_send.utils.toHex(GAS_FEE)
+      }).catch((error : any) => {
+        console.log(error);
+      });
+    } else {
+      setError(true);
+      setErrorMessage("Change network to create the authorisation");
+    }
+  }
+
   const acceptAuthorisation = async (guest: string) => {
     const chainId : bigint = await blockchain.web3_send.eth.getChainId();
 
     if(chainId == BigInt(80001)) {
       blockchain.contract_send.methods.acceptAuthorisation(guest).send({
         from: wallet.account,
-        gas: blockchain.web3_send.utils.toHex(5000000)
+        gas: blockchain.web3_send.utils.toHex(GAS_FEE)
       }).catch((error : any) => {
         console.log(error);
       });
@@ -84,7 +104,7 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
     if(chainId == BigInt(80001)) {
       blockchain.contract_send.methods.rejectAuthorisation(guest).send({
         from: wallet.account,
-        gas: blockchain.web3_send.utils.toHex(5000000)
+        gas: blockchain.web3_send.utils.toHex(GAS_FEE)
       }).catch((error : any) => {
         console.log(error);
       });
@@ -100,7 +120,7 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
     if(chainId == BigInt(80001)) {
       blockchain.contract_send.methods.reset().send({
         from: wallet.account,
-        gas: blockchain.web3_send.utils.toHex(5000000)
+        gas: blockchain.web3_send.utils.toHex(GAS_FEE)
       }).catch((error : any) => {
         console.log(error);
       });
@@ -128,11 +148,15 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
     });
   }
 
+  const checkAddress = (address: string) => !blockchain.web3_fetch.eth.isAddress(address);
+
   const contextValue: OwnerContextType = {
     data,
+    createAuthorisation,
     acceptAuthorisation,
     rejectAuthorisation,
     reset,
+    checkAddress
   };
 
   return (
