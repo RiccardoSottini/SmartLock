@@ -14,7 +14,7 @@ export default function Access ({timestamp} : AccessProps) {
     return (
         <div className="col mb-3">
             <div className="border card">
-                <div className="card-body">
+                <div className="card-body text-center">
                     <p className="mb-1 font-bold">{ date }</p>
                     <p className="mb-0">{ time }</p>
                 </div>

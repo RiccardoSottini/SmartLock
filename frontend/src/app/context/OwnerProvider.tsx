@@ -1,24 +1,26 @@
 "use client"
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { AppContext, Authorisation, Status, GAS_FEE } from "./AppProvider";
+import { AppContext, Authorisation, Status, AccessType, GAS_FEE } from "./AppProvider";
 
 export type OwnerContextType = {
   data: Authorisation[];
-  createAuthorisation: (guest: string) => void;
+  createAuthorisation: (name: string, guest: string) => void;
   acceptAuthorisation: (guest: string) => void;
   rejectAuthorisation: (guest: string) => void;
   reset: () => void;
   checkAddress: (address: string) => boolean;
+  getAccesses: (guest: string) => AccessType[];
 };
 
 export const OwnerContext = createContext<OwnerContextType>({
   data: [],
-  createAuthorisation: (guest: string) => {},
+  createAuthorisation: (name: string, guest: string) => {},
   acceptAuthorisation: (guest: string) => {},
   rejectAuthorisation: (guest: string) => {},
   reset: () => {},
-  checkAddress: (address: string) => true
+  checkAddress: (address: string) => true,
+  getAccesses: (guest: string) => []
 });
 
 interface OwnerProviderProps {
@@ -59,18 +61,19 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
       authorisations.push({
         timestamp: authorisation.timestamp,
         guest: authorisation.guest,
+        name: authorisation.name,
         status: Number(authorisation.status) as Status
-      } as Authorisation);
+      });
     });
 
     setData(authorisations);
   }
 
-  const createAuthorisation = async (guest: string) => {
+  const createAuthorisation = async (name: string, guest: string) => {
     const chainId : bigint = await blockchain.web3_send.eth.getChainId();
 
     if(chainId == BigInt(80001)) {
-      blockchain.contract_send.methods.createAuthorisation(guest).send({
+      blockchain.contract_send.methods.createAuthorisation(name, guest).send({
         from: wallet.account,
         gas: blockchain.web3_send.utils.toHex(GAS_FEE)
       }).catch((error : any) => {
@@ -114,6 +117,23 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
     }
   }
 
+  const getAccesses = async (guest: string) => {
+    let result : AccessType[] = await blockchain.contract_fetch.methods.getAccesses(guest).call({
+      from: wallet.account
+    });
+
+    let resultAccesses: AccessType[] = [];
+
+    result.forEach(function(access) {
+      resultAccesses.push({
+        timestamp: access.timestamp,
+        guest: access.guest,
+      } as AccessType);
+    });
+
+    return resultAccesses.reverse();
+  }
+
   const reset = async () => {
     const chainId : bigint = await blockchain.web3_send.eth.getChainId();
 
@@ -143,12 +163,16 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
       refresh();
     });
 
+    /*blockchain.contract_fetch.events.newAccess().on("data", (event : any) => { 
+      refresh();
+    });*/
+
     blockchain.contract_fetch.events.newReset().on("data", (event : any) => { 
       refresh();
     });
   }
 
-  const checkAddress = (address: string) => !blockchain.web3_fetch.eth.isAddress(address);
+  const checkAddress = (address: string) => blockchain.web3_fetch.utils.isAddress(address);
 
   const contextValue: OwnerContextType = {
     data,
@@ -156,7 +180,8 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
     acceptAuthorisation,
     rejectAuthorisation,
     reset,
-    checkAddress
+    checkAddress,
+    getAccesses
   };
 
   return (

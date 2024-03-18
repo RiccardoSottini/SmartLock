@@ -6,14 +6,14 @@ import { AppContext, Authorisation, AccessType, Status, GAS_FEE } from "./AppPro
 export type GuestContextType = {
   authorisation: Authorisation;
   accesses: AccessType[],
-  requestAuthorisation: () => void;
+  requestAuthorisation: (name: string) => void;
   accessDoor: () => void;
 };
 
 export const GuestContext = createContext<GuestContextType>({
-  authorisation: { timestamp: "", guest: "", status: Status.NULL },
+  authorisation: { timestamp: "", guest: "", name: "", status: Status.NULL },
   accesses: [],
-  requestAuthorisation: () => {},
+  requestAuthorisation: (name: string) => {},
   accessDoor: () => {}
 });
 
@@ -24,7 +24,7 @@ interface GuestProviderProps {
 export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {  
   const { isConnected, setError, setErrorMessage, blockchain, wallet, refreshWallet } = useContext(AppContext);
 
-  const [authorisation, setAuthorisation] = useState<Authorisation>({timestamp: "", guest: "", status: Status.NULL});
+  const [authorisation, setAuthorisation] = useState<Authorisation>({timestamp: "", guest: "", name: "", status: Status.NULL});
   const [accesses, setAccesses] = useState<AccessType[]>([]);
 
   useEffect(() => {
@@ -73,14 +73,14 @@ export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {
       } as AccessType);
     });
 
-    setAccesses(resultAccesses);
+    setAccesses(resultAccesses.reverse());
   }
 
-  const requestAuthorisation = async () => {
+  const requestAuthorisation = async (name: string) => {
     const chainId : bigint = await blockchain.web3_send.eth.getChainId();
 
     if(chainId == BigInt(80001)) {
-      blockchain.contract_send.methods.requestAuthorisation().send({
+      blockchain.contract_send.methods.requestAuthorisation(name).send({
         from: wallet.account,
         gas: blockchain.web3_send.utils.toHex(GAS_FEE)
       }).catch((error : any) => {

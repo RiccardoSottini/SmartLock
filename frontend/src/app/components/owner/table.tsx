@@ -61,11 +61,12 @@ const statuses = [
 export type OwnerTableProps = {
     rows: any;
     onOpen: () => void;
+    onOpenHistory: (guest: string) => void;
     acceptAuthorisation: (guest: string) => void;
     rejectAuthorisation: (guest: string) => void;
 };
 
-export default function OwnerTable ({rows, onOpen, acceptAuthorisation, rejectAuthorisation} : OwnerTableProps) {
+export default function OwnerTable ({rows, onOpen, onOpenHistory, acceptAuthorisation, rejectAuthorisation} : OwnerTableProps) {
     const [filterValue, setFilterValue] = useState<string>("");
     const [statusFilter, setStatusFilter] = useState<string>("all");
 
@@ -130,12 +131,12 @@ export default function OwnerTable ({rows, onOpen, acceptAuthorisation, rejectAu
                     </Chip>
                 );
             case "actions":
-                let disabledKeys : string[] = [];
+                let disabledKeys : string[] = ["history"];
 
                 if(authorisation.status == Status.ACCEPTED) {
                     disabledKeys = ["accept"];
                 } else if(authorisation.status == Status.REJECTED) {
-                    disabledKeys = ["reject"];
+                    disabledKeys = ["reject", "history"];
                 }
 
                 return (
@@ -147,8 +148,9 @@ export default function OwnerTable ({rows, onOpen, acceptAuthorisation, rejectAu
                             </Button>
                             </DropdownTrigger>
                             <DropdownMenu disabledKeys={disabledKeys}>
-                            <DropdownItem key="accept" onClick={(e) => {acceptAuthorisation(authorisation.guest)}}>Accept</DropdownItem>
-                            <DropdownItem key="reject" onClick={(e) => {rejectAuthorisation(authorisation.guest)}}>Reject</DropdownItem>
+                                <DropdownItem key="history" onClick={(e) => {onOpenHistory(authorisation.guest)}}>History</DropdownItem>
+                                <DropdownItem key="accept" onClick={(e) => {acceptAuthorisation(authorisation.guest)}}>Accept</DropdownItem>
+                                <DropdownItem key="reject" onClick={(e) => {rejectAuthorisation(authorisation.guest)}}>Reject</DropdownItem>
                             </DropdownMenu>
                         </Dropdown>
                     </div>
@@ -214,7 +216,9 @@ export default function OwnerTable ({rows, onOpen, acceptAuthorisation, rejectAu
 
     return (
         <>
-            <h1 className="mt-4 font-bold">List of Authorisations</h1>
+            <div className="mt-2 mb-2" style={{fontSize: "20px", fontWeight: "bold"}}>
+                List of Authorisations
+            </div>
             <Table className="mt-2" topContent={topContent} topContentPlacement="inside">
                 <TableHeader>
                     {columns.map((column : any) =>

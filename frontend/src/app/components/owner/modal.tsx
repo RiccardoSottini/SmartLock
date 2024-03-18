@@ -14,35 +14,50 @@ export type OwnerModalProps = {
     rows: any;
     isOpen: boolean;
     onOpenChange: () => void;
-    createAuthorisation: (guest: string) => void;
+    createAuthorisation: (guest: string, address: string) => void;
 };
 
 export default function OwnerModal ({checkAddress, rows, isOpen, onOpenChange, createAuthorisation} : OwnerModalProps) {
-    const [name, setName] = useState<string>("");
-    const [address, setAddress] = useState<string>("");
-    const [error, setError] = useState<string>("");
+    const [name, setName] = useState<string | undefined>();
+    const [address, setAddress] = useState<string | undefined>();
+    const [errorName, setErrorName] = useState<string>("");
+    const [errorAddress, setErrorAddress] = useState<string>("");
 
-    const onPress = (onClose) => {
-        createAuthorisation(address);
+    const onPress = (onClose : any) => {
+        if(name && address) {
+            createAuthorisation(name, address);
+        }
+
         onClose();
     }
 
     useEffect(() => {
-        console.log(address);
-        console.log(rows);
-        console.log(rows.find((authorisation : any) => authorisation.guest == address));
-
-        if(rows.find((authorisation : any) => authorisation.guest.toLowerCase() == address.toLowerCase())) {
-            setError("There is already an authorisation request for this address");
-        } else if(!checkAddress(address)) {
-            setError("Enter a valid blockchain address");
+        if(name == "") {
+            setErrorName("Enter a valid name");
         } else {
-            setError("");
+            setErrorName("");
         }
-    }, [address, rows]);
+
+        if(rows.find((authorisation : any) => authorisation.guest.toLowerCase() == address?.toLowerCase())) {
+            setErrorAddress("There is already an authorisation request for this address");
+        } else if((!checkAddress(address) && address != undefined) || address == "") {
+            setErrorAddress("Enter a valid blockchain address");
+        } else {
+            setErrorAddress("");
+        }
+    }, [name, address, rows]);
+
+    const closeModal = () => {
+        setName(undefined);
+        setAddress(undefined);
+        setErrorName("");
+        setErrorAddress("");
+
+        onOpenChange();
+    }
 
     return (
-        <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="top-center">
+        <Modal isOpen={isOpen} onOpenChange={closeModal} placement="top-center">
             <ModalContent>
                 {(onClose) => (
                     <>
@@ -57,7 +72,9 @@ export default function OwnerModal ({checkAddress, rows, isOpen, onOpenChange, c
                                 placeholder="Enter the name"
                                 variant="bordered"
                                 value={name}
-                                onValueChange={setName}
+                                onValueChange={setName}  
+                                isInvalid={errorName != ""}
+                                errorMessage={errorName}
                             />
                             <Input
                                 autoFocus
@@ -69,15 +86,15 @@ export default function OwnerModal ({checkAddress, rows, isOpen, onOpenChange, c
                                 variant="bordered"
                                 value={address}
                                 onValueChange={setAddress}      
-                                isInvalid={error != ""}
-                                errorMessage={error}
+                                isInvalid={errorAddress != ""}
+                                errorMessage={errorAddress}
                             />
                         </ModalBody>
                         <ModalFooter>
                             <Button color="danger" variant="flat" onPress={onClose}>
                                 Cancel
                             </Button>
-                            <Button color="primary" onPress={(e) => {onPress(onClose)}}>
+                            <Button color="primary" disabled={errorName != "" || errorAddress != ""} onPress={(e) => {onPress(onClose)}}>
                                 Confirm
                             </Button>
                         </ModalFooter>

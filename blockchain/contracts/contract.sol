@@ -11,6 +11,7 @@ contract SmartDoor {
     struct Authorisation {
         uint timestamp;     // timestamp of the request
         address guest;      // address of the guest 
+        string name;        // name of the guest
         Status status;      // status of the authorisation
         bool exists;        // flag to prove the authorisation existance
     }
@@ -48,12 +49,12 @@ contract SmartDoor {
     }
 
     /* Function to request the authorisation - Guest functionality */
-    function requestAuthorisation() public payable {
+    function requestAuthorisation(string memory name) public payable {
         // Check if the guest has already requested an authorisation
         require(authorisations[msg.sender].exists == false, "You have already requested an authorisation");
 
         // Register the authorisation request with the pending status
-        authorisations[msg.sender] = Authorisation(block.timestamp, msg.sender, Status.PENDING, true);
+        authorisations[msg.sender] = Authorisation(block.timestamp, msg.sender, name, Status.PENDING, true);
         guests.push(msg.sender);
 
         // Emit the event highlighting a new pending authorisation
@@ -66,7 +67,7 @@ contract SmartDoor {
             return authorisations[msg.sender];
         }
 
-        return Authorisation(0, address(0x0), Status.NULL, false);
+        return Authorisation(0, address(0x0), "", Status.NULL, false);
     }
 
     /* Function to access the door - Guest functionality */
@@ -108,11 +109,11 @@ contract SmartDoor {
     }
 
     /* Function to create an authorisation request - Owner functionality */
-    function createAuthorisation(address guest) public payable {
+    function createAuthorisation(string memory name, address guest) public payable {
         require(msg.sender == owner, "You need to be the owner of the contract");
         require(!authorisations[guest].exists, "The authorisation request already exists");
 
-        authorisations[guest] = Authorisation(block.timestamp, guest, Status.ACCEPTED, true);
+        authorisations[guest] = Authorisation(block.timestamp, guest, name, Status.ACCEPTED, true);
         guests.push(guest);
 
         emit acceptedAuthorisation(guest);
@@ -151,6 +152,21 @@ contract SmartDoor {
 
         emit deletedAuthorisation(guest);
     }*/
+
+    /* Function to retrieve the list of door accesses of a specific guest - Owner functionality */
+    function getAccesses(address guest) public view returns (Access[] memory) {
+        require(msg.sender == owner, "You need to be the owner of the contract");
+        require(authorisations[guest].exists, "The authorisation request does not exist");
+
+        uint count = accesses[guest].length;
+        Access[] memory localAccesses = new Access[](count);
+
+        for (uint index = 0; index < count; index++) {
+            localAccesses[index] = accesses[guest][index];
+        }
+        
+        return localAccesses;
+    }
 
     /* Function to reset the data stored in the contract - Owner functionality */
     function reset() public payable {
