@@ -28,7 +28,7 @@ export default function OwnerHistory ({accesses, isOpenHistory, onCloseHistory} 
                                     ))}
                                 </div>
                             ) : (
-                                <p>You have never accessed the door before.</p>
+                                <p>The guest has never accessed the door before.</p>
                             )}
                         </ModalBody>
                     </>

@@ -10,7 +10,7 @@ export type OwnerContextType = {
   rejectAuthorisation: (guest: string) => void;
   reset: () => void;
   checkAddress: (address: string) => boolean;
-  getAccesses: (guest: string) => AccessType[];
+  getAccesses: (guest: string) => Promise<AccessType[]>;
 };
 
 export const OwnerContext = createContext<OwnerContextType>({
@@ -20,7 +20,7 @@ export const OwnerContext = createContext<OwnerContextType>({
   rejectAuthorisation: (guest: string) => {},
   reset: () => {},
   checkAddress: (address: string) => true,
-  getAccesses: (guest: string) => []
+  getAccesses: (guest: string) => new Promise(() => {})
 });
 
 interface OwnerProviderProps {

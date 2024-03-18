@@ -8,7 +8,6 @@ import { NextUIProvider } from "@nextui-org/react";
 import Header from './components/header';
 import Owner from './components/owner';
 import Guest from './components/guest';
-
 import { GuestProvider } from './context/GuestProvider';
 import { OwnerProvider } from './context/OwnerProvider';
 

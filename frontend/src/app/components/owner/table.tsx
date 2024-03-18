@@ -19,7 +19,19 @@ import {
     DropdownItem
 } from "@nextui-org/react";
 
-const columns = [
+export type ColumnType = {
+    key: string;
+    label: string;
+}
+
+export type StatusType = {
+    value: string;
+    name: string;
+    color: "warning" | "success" | "danger" | "default" | "primary" | "secondary" | undefined;
+    display: boolean;
+}
+
+const columns : ColumnType[] = [
     {
         key: "guest",
         label: "GUEST"
@@ -35,10 +47,11 @@ const columns = [
     }
 ];
 
-const statuses = [
+const statuses : StatusType[] = [
     {
         value: "NULL",
         name: "null",
+        color: undefined,
         display: false
     }, {
         value: "PENDING",
@@ -186,7 +199,7 @@ export default function OwnerTable ({rows, onOpen, onOpenHistory, acceptAuthoris
                                 closeOnSelect={false}
                                 selectedKeys={statusFilter}
                                 selectionMode="multiple"
-                                onSelectionChange={setStatusFilter}
+                                onSelectionChange={(keys) => {setStatusFilter(String(keys))}}
                             >
                                 {statuses.filter((status) => status.display).map((status) => (
                                     <DropdownItem key={status.value}>

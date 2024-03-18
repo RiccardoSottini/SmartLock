@@ -32,7 +32,7 @@ export default function OwnerModal ({checkAddress, rows, isOpen, onOpenChange, c
     }
 
     useEffect(() => {
-        if(name == "") {
+        if(name?.trim().length == 0) {
             setErrorName("Enter a valid name");
         } else {
             setErrorName("");
@@ -40,7 +40,7 @@ export default function OwnerModal ({checkAddress, rows, isOpen, onOpenChange, c
 
         if(rows.find((authorisation : any) => authorisation.guest.toLowerCase() == address?.toLowerCase())) {
             setErrorAddress("There is already an authorisation request for this address");
-        } else if((!checkAddress(address) && address != undefined) || address == "") {
+        } else if((!checkAddress(address) && address != undefined) || address?.trim().length == 0) {
             setErrorAddress("Enter a valid blockchain address");
         } else {
             setErrorAddress("");
@@ -94,7 +94,7 @@ export default function OwnerModal ({checkAddress, rows, isOpen, onOpenChange, c
                             <Button color="danger" variant="flat" onPress={onClose}>
                                 Cancel
                             </Button>
-                            <Button color="primary" disabled={errorName != "" || errorAddress != ""} onPress={(e) => {onPress(onClose)}}>
+                            <Button color="primary" disabled={errorName != "" || errorAddress != "" || name == undefined || address == undefined} onPress={(e) => {onPress(onClose)}}>
                                 Confirm
                             </Button>
                         </ModalFooter>
