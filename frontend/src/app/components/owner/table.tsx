@@ -81,7 +81,7 @@ export type OwnerTableProps = {
 
 export default function OwnerTable ({rows, onOpen, onOpenHistory, acceptAuthorisation, rejectAuthorisation} : OwnerTableProps) {
     const [filterValue, setFilterValue] = useState<string>("");
-    const [statusFilter, setStatusFilter] = useState<string>("all");
+    const [statusFilter, setStatusFilter] = useState<any>("all");
 
     const filteredRows = useMemo(() => {
         let filteredRows = [...rows];
@@ -199,7 +199,7 @@ export default function OwnerTable ({rows, onOpen, onOpenHistory, acceptAuthoris
                                 closeOnSelect={false}
                                 selectedKeys={statusFilter}
                                 selectionMode="multiple"
-                                onSelectionChange={(keys) => {setStatusFilter(String(keys))}}
+                                onSelectionChange={(keys) => {setStatusFilter(keys)}}
                             >
                                 {statuses.filter((status) => status.display).map((status) => (
                                     <DropdownItem key={status.value}>

@@ -38,3 +38,8 @@ body {
     width: 100px;
   }
 }
+
+ul {
+  margin-bottom: 0px !important;
+  padding-left: 0px !important;
+}
