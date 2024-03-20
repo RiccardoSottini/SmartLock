@@ -43,8 +43,6 @@ export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {
 
   const refresh = async () => {
     getAuthorisation();
-    
-    refreshWallet();
   }
 
   const getAuthorisation = async () => {
@@ -109,32 +107,14 @@ export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {
   }
 
   const setupListener = () => {
-    blockchain.contract_fetch.events.pendingAuthorisation().on("data", (event : any) => { 
-      if(event.returnValues.guest && event.returnValues.guest.toLowerCase() == wallet.account.toLowerCase()) {
+    blockchain.contract_fetch.events.updateGuest({filter: wallet.account.toLowerCase()}).on("data", (event : any) => { 
         refresh();
-      }
-    });
-
-    blockchain.contract_fetch.events.acceptedAuthorisation().on("data", (event : any) => { 
-      if(event.returnValues.guest && event.returnValues.guest.toLowerCase() == wallet.account.toLowerCase()) {
-        refresh();
-      }
-    });
-
-    blockchain.contract_fetch.events.rejectedAuthorisation().on("data", (event : any) => { 
-      if(event.returnValues.guest && event.returnValues.guest.toLowerCase() == wallet.account.toLowerCase()) {
-        refresh();
-      }
-    });
-
-    blockchain.contract_fetch.events.newAccess().on("data", (event : any) => { 
-      if(event.returnValues.guest && event.returnValues.guest.toLowerCase() == wallet.account.toLowerCase()) {
-        refresh();
-      }
+        console.log("3");
     });
 
     blockchain.contract_fetch.events.newReset().on("data", (event : any) => { 
       refresh();
+      console.log("4");
     });
   }
 

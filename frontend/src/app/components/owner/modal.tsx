@@ -77,7 +77,6 @@ export default function OwnerModal ({checkAddress, rows, isOpen, onOpenChange, c
                                 errorMessage={errorName}
                             />
                             <Input
-                                autoFocus
                                 endContent={
                                     ""
                                 }

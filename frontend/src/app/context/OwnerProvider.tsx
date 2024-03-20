@@ -40,14 +40,12 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
     }
   }, [isConnected]);
 
-  useEffect(() => {
-    //console.log(data);
-  }, [data]);
+  /*useEffect(() => {
+    console.log(data);
+  }, [data]);*/
 
   const refresh = async () => {
     getData();
-
-    refreshWallet();
   }
 
   const getData = async () => {
@@ -151,24 +149,9 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
   }
 
   const setupListener = () => {
-    blockchain.contract_fetch.events.pendingAuthorisation().on("data", (event : any) => { 
+    blockchain.contract_fetch.events.updateOwner().on("data", (event : any) => { 
       refresh();
-    });
-
-    blockchain.contract_fetch.events.acceptedAuthorisation().on("data", (event : any) => { 
-      refresh();
-    });
-
-    blockchain.contract_fetch.events.rejectedAuthorisation().on("data", (event : any) => { 
-      refresh();
-    });
-
-    /*blockchain.contract_fetch.events.newAccess().on("data", (event : any) => { 
-      refresh();
-    });*/
-
-    blockchain.contract_fetch.events.newReset().on("data", (event : any) => { 
-      refresh();
+      console.log("1");
     });
   }
 

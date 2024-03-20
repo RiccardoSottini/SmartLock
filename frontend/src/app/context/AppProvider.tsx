@@ -11,8 +11,8 @@ declare global {
   }
 }
 
-const CONTRACT_ADDRESS = "0xCf9058B6aD713115730d0183140130A1A3AAC9ce";
-const CONTRACT_ABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"acceptedAuthorisation","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"newAccess","type":"event"},{"anonymous":false,"inputs":[],"name":"newReset","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"pendingAuthorisation","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"}],"name":"rejectedAuthorisation","type":"event"},{"inputs":[{"internalType":"address","name":"guest","type":"address"}],"name":"acceptAuthorisation","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"accessDoor","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"string","name":"name","type":"string"},{"internalType":"address","name":"guest","type":"address"}],"name":"createAuthorisation","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"guest","type":"address"}],"name":"getAccesses","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"guest","type":"address"}],"internalType":"struct SmartDoor.Access[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getAccesses","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"guest","type":"address"}],"internalType":"struct SmartDoor.Access[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getAuthorisation","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"guest","type":"address"},{"internalType":"string","name":"name","type":"string"},{"internalType":"enum SmartDoor.Status","name":"status","type":"uint8"},{"internalType":"bool","name":"exists","type":"bool"}],"internalType":"struct SmartDoor.Authorisation","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getData","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"guest","type":"address"},{"internalType":"string","name":"name","type":"string"},{"internalType":"enum SmartDoor.Status","name":"status","type":"uint8"},{"internalType":"bool","name":"exists","type":"bool"}],"internalType":"struct SmartDoor.Authorisation[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getRole","outputs":[{"internalType":"enum SmartDoor.Role","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"guest","type":"address"}],"name":"rejectAuthorisation","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"string","name":"name","type":"string"}],"name":"requestAuthorisation","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"reset","outputs":[],"stateMutability":"payable","type":"function"}];
+const CONTRACT_ADDRESS = "0x2d8380dE65602261BFCD9Fa17eB8Bf2F3fcdA8d4";
+const CONTRACT_ABI = require("../includes/contract_abi.json");
 const WEB3_PROVIDER = "wss://rough-solitary-gas.matic-testnet.quiknode.pro/95a66b31d01626a4af842562f3d780388e4e97e9/"
 
 export const GAS_FEE = 5000000;
@@ -115,6 +115,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   }, [blockchain]);
 
+  useEffect(() => {
+    if(isConnected) {
+      refreshWallet();
+    }
+  }, [isConnected]);
+
   const setupBlockchain = async () => {
     const web3_send = new Web3(window.ethereum);
     const web3_fetch = new Web3(WEB3_PROVIDER);
@@ -158,7 +164,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   const refreshWallet = () => {
     if(wallet) {
-      updateWallet(wallet.account);
+      setInterval(() => {
+        updateWallet(wallet.account);
+      }, 5000);
     }
   }
 
