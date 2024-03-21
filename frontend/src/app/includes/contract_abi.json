@@ -24,6 +24,12 @@
           "internalType": "address",
           "name": "guest",
           "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "method",
+          "type": "string"
         }
       ],
       "name": "updateGuest",
@@ -31,7 +37,14 @@
     },
     {
       "anonymous": false,
-      "inputs": [],
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "method",
+          "type": "string"
+        }
+      ],
       "name": "updateOwner",
       "type": "event"
     },

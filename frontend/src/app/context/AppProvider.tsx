@@ -11,7 +11,7 @@ declare global {
   }
 }
 
-const CONTRACT_ADDRESS = "0x2d8380dE65602261BFCD9Fa17eB8Bf2F3fcdA8d4";
+const CONTRACT_ADDRESS = "0x8701B311CAd384D7DB2Fa63b6179ae942707e4a4";
 const CONTRACT_ABI = require("../includes/contract_abi.json");
 const WEB3_PROVIDER = "wss://rough-solitary-gas.matic-testnet.quiknode.pro/95a66b31d01626a4af842562f3d780388e4e97e9/"
 

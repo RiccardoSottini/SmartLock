@@ -35,8 +35,8 @@ contract SmartDoor {
     event newAccess();
     event newReset();
 
-    event updateGuest(address guest);
-    event updateOwner();
+    event updateGuest(address guest, string method);
+    event updateOwner(string method);
 
     /* Function to retrieve the role of the user */
     function getRole() public view returns (Role) {
@@ -57,8 +57,8 @@ contract SmartDoor {
         guests.push(msg.sender);
 
         // Emit the event highlighting a new pending authorisation
-        emit updateGuest(msg.sender);
-        emit updateOwner();
+        emit updateGuest(msg.sender, "pendingAuthorisation");
+        emit updateOwner("pendingAuthorisation");
     }
 
     /* Function to retrieve the authorisation - Guest functionality */
@@ -81,8 +81,8 @@ contract SmartDoor {
         // Emit an event highlighting a new access to the door
         emit newAccess();
 
-        emit updateGuest(msg.sender);
-        emit updateOwner();
+        emit updateGuest(msg.sender, "newAccess");
+        emit updateOwner("newAccess");
     }
 
     /* Function to retrieve the list of door accesses of the guest - Guest functionality */
@@ -119,8 +119,8 @@ contract SmartDoor {
         authorisations[guest] = Authorisation(block.timestamp, guest, name, Status.ACCEPTED, true);
         guests.push(guest);
 
-        emit updateGuest(guest);
-        emit updateOwner();
+        emit updateGuest(guest, "acceptedAuthorisation");
+        emit updateOwner("acceptedAuthorisation");
     }
 
     /* Function to accept an authorisation request - Owner functionality */
@@ -131,8 +131,8 @@ contract SmartDoor {
 
         authorisations[guest].status = Status.ACCEPTED;
 
-        emit updateGuest(guest);
-        emit updateOwner();
+        emit updateGuest(guest, "acceptedAuthorisation");
+        emit updateOwner("acceptedAuthorisation");
     }
     
     /* Function to reject an authorisation request - Owner functionality */
@@ -143,8 +143,8 @@ contract SmartDoor {
 
         authorisations[guest].status = Status.REJECTED;
 
-        emit updateGuest(guest);
-        emit updateOwner();
+        emit updateGuest(guest, "rejectedAuthorisation");
+        emit updateOwner("rejectedAuthorisation");
     }
 
     /* Function to delete an authorisation request - Owner functionality */
@@ -186,6 +186,6 @@ contract SmartDoor {
         delete guests;
 
         emit newReset();
-        emit updateOwner();
+        emit updateOwner("newReset");
     }
 }
