@@ -15,7 +15,8 @@ const CONTRACT_ADDRESS = "0x8701B311CAd384D7DB2Fa63b6179ae942707e4a4";
 const CONTRACT_ABI = require("../includes/contract_abi.json");
 const WEB3_PROVIDER = "wss://rough-solitary-gas.matic-testnet.quiknode.pro/95a66b31d01626a4af842562f3d780388e4e97e9/"
 
-export const GAS_FEE = 5000000;
+export const GAS_FEE = 10000000;
+export const CHAIN_ID : bigint = BigInt(80001);
 
 export enum Status {
   NULL = 0,
@@ -68,6 +69,7 @@ export type AppContextType = {
   role: Role;
   connectWallet: () => void;
   refreshWallet: () => void;
+  checkChain: (chainId: bigint) => boolean;
 };
 
 export const AppContext = createContext<AppContextType>({
@@ -82,7 +84,8 @@ export const AppContext = createContext<AppContextType>({
   wallet: { account: "", balance: "" },
   role: Role.NULL,
   connectWallet: () => {},
-  refreshWallet: () => {}
+  refreshWallet: () => {},
+  checkChain: (chainId: bigint) => true
 });
 
 interface AppProviderProps {
@@ -199,6 +202,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     return blockchain.web3_fetch.utils.fromWei(rawBalance, 'ether');
   }
 
+  const checkChain = (chainId: bigint) => {
+    return chainId == CHAIN_ID;
+  }
+
   const contextValue: AppContextType = {
     isLoading,
     isConnected,
@@ -212,7 +219,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     wallet,
     role,
     connectWallet,
-    refreshWallet
+    refreshWallet,
+    checkChain
   };
 
   return (

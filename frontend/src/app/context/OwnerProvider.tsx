@@ -28,7 +28,7 @@ interface OwnerProviderProps {
 }
 
 export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {  
-  const { isConnected, setError, setErrorMessage, blockchain, wallet, refreshWallet } = useContext(AppContext);
+  const { isConnected, setError, setErrorMessage, blockchain, wallet, checkChain } = useContext(AppContext);
 
   const [data, setData] = useState<Authorisation[]>([]);
 
@@ -67,54 +67,6 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
     setData(authorisations);
   }
 
-  const createAuthorisation = async (name: string, guest: string) => {
-    const chainId : bigint = await blockchain.web3_send.eth.getChainId();
-
-    if(chainId == BigInt(80001)) {
-      blockchain.contract_send.methods.createAuthorisation(name, guest).send({
-        from: wallet.account,
-        gas: blockchain.web3_send.utils.toHex(GAS_FEE)
-      }).catch((error : any) => {
-        console.log(error);
-      });
-    } else {
-      setError(true);
-      setErrorMessage("Change network to create the authorisation");
-    }
-  }
-
-  const acceptAuthorisation = async (guest: string) => {
-    const chainId : bigint = await blockchain.web3_send.eth.getChainId();
-
-    if(chainId == BigInt(80001)) {
-      blockchain.contract_send.methods.acceptAuthorisation(guest).send({
-        from: wallet.account,
-        gas: blockchain.web3_send.utils.toHex(GAS_FEE)
-      }).catch((error : any) => {
-        console.log(error);
-      });
-    } else {
-      setError(true);
-      setErrorMessage("Change network to accept the request for authorisation");
-    }
-  }
-
-  const rejectAuthorisation = async (guest: string) => {
-    const chainId : bigint = await blockchain.web3_send.eth.getChainId();
-
-    if(chainId == BigInt(80001)) {
-      blockchain.contract_send.methods.rejectAuthorisation(guest).send({
-        from: wallet.account,
-        gas: blockchain.web3_send.utils.toHex(GAS_FEE)
-      }).catch((error : any) => {
-        console.log(error);
-      });
-    } else {
-      setError(true);
-      setErrorMessage("Change network to reject the request for authorisation");
-    }
-  }
-
   const getAccesses = async (guest: string) => {
     let result : AccessType[] = await blockchain.contract_fetch.methods.getAccesses(guest).call({
       from: wallet.account
@@ -132,10 +84,58 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
     return resultAccesses.reverse();
   }
 
+  const createAuthorisation = async (name: string, guest: string) => {
+    const chainId : bigint = await blockchain.web3_send.eth.getChainId();
+
+    if(checkChain(chainId)) {
+      blockchain.contract_send.methods.createAuthorisation(name, guest).send({
+        from: wallet.account,
+        gas: blockchain.web3_send.utils.toHex(GAS_FEE)
+      }).catch((error : any) => {
+        console.log(error);
+      });
+    } else {
+      setError(true);
+      setErrorMessage("Change network to create the authorisation");
+    }
+  }
+
+  const acceptAuthorisation = async (guest: string) => {
+    const chainId : bigint = await blockchain.web3_send.eth.getChainId();
+
+    if(checkChain(chainId)) {
+      blockchain.contract_send.methods.acceptAuthorisation(guest).send({
+        from: wallet.account,
+        gas: blockchain.web3_send.utils.toHex(GAS_FEE)
+      }).catch((error : any) => {
+        console.log(error);
+      });
+    } else {
+      setError(true);
+      setErrorMessage("Change network to accept the request for authorisation");
+    }
+  }
+
+  const rejectAuthorisation = async (guest: string) => {
+    const chainId : bigint = await blockchain.web3_send.eth.getChainId();
+
+    if(checkChain(chainId)) {
+      blockchain.contract_send.methods.rejectAuthorisation(guest).send({
+        from: wallet.account,
+        gas: blockchain.web3_send.utils.toHex(GAS_FEE)
+      }).catch((error : any) => {
+        console.log(error);
+      });
+    } else {
+      setError(true);
+      setErrorMessage("Change network to reject the request for authorisation");
+    }
+  }
+
   const reset = async () => {
     const chainId : bigint = await blockchain.web3_send.eth.getChainId();
 
-    if(chainId == BigInt(80001)) {
+    if(checkChain(chainId)) {
       blockchain.contract_send.methods.reset().send({
         from: wallet.account,
         gas: blockchain.web3_send.utils.toHex(GAS_FEE)
@@ -151,7 +151,6 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
   const setupListener = () => {
     blockchain.contract_fetch.events.updateOwner().on("data", (event : any) => { 
       refresh();
-      console.log("1");
     });
   }
 

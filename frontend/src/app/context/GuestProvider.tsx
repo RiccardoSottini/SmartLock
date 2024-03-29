@@ -22,7 +22,7 @@ interface GuestProviderProps {
 }
 
 export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {  
-  const { isConnected, setError, setErrorMessage, blockchain, wallet, refreshWallet } = useContext(AppContext);
+  const { isConnected, setError, setErrorMessage, blockchain, wallet, checkChain } = useContext(AppContext);
 
   const [authorisation, setAuthorisation] = useState<Authorisation>({timestamp: "", guest: "", name: "", status: Status.NULL});
   const [accesses, setAccesses] = useState<AccessType[]>([]);
@@ -77,7 +77,7 @@ export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {
   const requestAuthorisation = async (name: string) => {
     const chainId : bigint = await blockchain.web3_send.eth.getChainId();
 
-    if(chainId == BigInt(80001)) {
+    if(checkChain(chainId)) {
       blockchain.contract_send.methods.requestAuthorisation(name).send({
         from: wallet.account,
         gas: blockchain.web3_send.utils.toHex(GAS_FEE)
@@ -93,7 +93,7 @@ export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {
   const accessDoor = async () => {
     const chainId : bigint = await blockchain.web3_send.eth.getChainId();
 
-    if(chainId == BigInt(80001)) {
+    if(checkChain(chainId)) {
       blockchain.contract_send.methods.accessDoor().send({
         from: wallet.account,
         gas: blockchain.web3_send.utils.toHex(GAS_FEE)
@@ -109,12 +109,10 @@ export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {
   const setupListener = () => {
     blockchain.contract_fetch.events.updateGuest({filter: wallet.account.toLowerCase()}).on("data", (event : any) => { 
         refresh();
-        console.log("3");
     });
 
     blockchain.contract_fetch.events.newReset().on("data", (event : any) => { 
       refresh();
-      console.log("4");
     });
   }
 
