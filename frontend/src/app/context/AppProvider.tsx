@@ -162,7 +162,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     const balance = formatBalance(await blockchain.web3_fetch.eth.getBalance(account, 'latest'));
 
     getRole(account);
-    setWallet({ account: account, balance: balance });
+    setWallet({ account: account, balance: Number.parseFloat(balance).toFixed(6) });
   }
 
   const refreshWallet = () => {

@@ -15,9 +15,9 @@ class SmartDoor:
     GPIO_TIME = 10      # Time the lock is kept open
 
     # Class constructor - create web3 and contract instances, setup GPIO pins
-    def __init__(self, blockchain_url, contract_address, contract_abi):
+    def __init__(self, provider_endpoint, contract_address, contract_abi):
         # Initiate the Web3 instance referencing to the blockchain provider HTTP endpoint
-        self.web3 = Web3(Web3.HTTPProvider(blockchain_url))
+        self.web3 = Web3(Web3.HTTPProvider(provider_endpoint))
 
         # Initiate the Contract instance referencing to the contract address and ABI
         self.contract = self.web3.eth.contract(address=contract_address, abi=contract_abi)
@@ -69,11 +69,15 @@ class SmartDoor:
 
 # Main function representing the script entry-point
 if __name__ == "__main__":
+    # Import configuration from config.json
+    config_file = open("config.json")
+    config_data = json.load(config_file)
+
     # Environment variables (blockchain provider endpoint - contract address - contract ABI)
-    blockchain_url = 'https://rough-solitary-gas.matic-testnet.discover.quiknode.pro/95a66b31d01626a4af842562f3d780388e4e97e9/'
-    contract_address = '0x8701B311CAd384D7DB2Fa63b6179ae942707e4a4'
-    contract_abi = json.loads('[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[],"name":"newAccess","type":"event"},{"anonymous":false,"inputs":[],"name":"newReset","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"guest","type":"address"},{"indexed":false,"internalType":"string","name":"method","type":"string"}],"name":"updateGuest","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"method","type":"string"}],"name":"updateOwner","type":"event"},{"inputs":[{"internalType":"address","name":"guest","type":"address"}],"name":"acceptAuthorisation","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"accessDoor","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"string","name":"name","type":"string"},{"internalType":"address","name":"guest","type":"address"}],"name":"createAuthorisation","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"guest","type":"address"}],"name":"getAccesses","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"guest","type":"address"}],"internalType":"struct SmartDoor.Access[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getAccesses","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"guest","type":"address"}],"internalType":"struct SmartDoor.Access[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getAuthorisation","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"guest","type":"address"},{"internalType":"string","name":"name","type":"string"},{"internalType":"enum SmartDoor.Status","name":"status","type":"uint8"},{"internalType":"bool","name":"exists","type":"bool"}],"internalType":"struct SmartDoor.Authorisation","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getData","outputs":[{"components":[{"internalType":"uint256","name":"timestamp","type":"uint256"},{"internalType":"address","name":"guest","type":"address"},{"internalType":"string","name":"name","type":"string"},{"internalType":"enum SmartDoor.Status","name":"status","type":"uint8"},{"internalType":"bool","name":"exists","type":"bool"}],"internalType":"struct SmartDoor.Authorisation[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getRole","outputs":[{"internalType":"enum SmartDoor.Role","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"guest","type":"address"}],"name":"rejectAuthorisation","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"string","name":"name","type":"string"}],"name":"requestAuthorisation","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"reset","outputs":[],"stateMutability":"payable","type":"function"}]')
+    provider_endpoint = config_data['provider_endpoint']
+    contract_address = config_data['contract_address']
+    contract_abi = config_data['contract_abi']
 
     # Create an instance of SmartDoor and start running the event loop 
-    smartDoor = SmartDoor(blockchain_url, contract_address, contract_abi)
+    smartDoor = SmartDoor(provider_endpoint, contract_address, contract_abi)
     smartDoor.run()

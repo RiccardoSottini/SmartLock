@@ -1,7 +1,7 @@
 // Solidity version adopted by the contract
 pragma solidity ^0.8.18;
 
-// Contract Name
+// Definition of the Contract interface
 contract SmartDoor {
     /* Enumeration with the roles of the user */
     enum Role { NULL, OWNER, GUEST }
