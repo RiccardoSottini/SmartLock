@@ -1,4 +1,4 @@
-# Process to deploy the contract on the blockchain network
+# Process to deploy the contract on the Polygon network
 
 ## Step 1: Setup Node & Install Hardhat + useful libraries
 Install Hardhat, which is a package helping developers to automate the deployment of a smart contract on the blockchain network.  

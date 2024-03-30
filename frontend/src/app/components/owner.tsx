@@ -6,6 +6,7 @@ import { OwnerContext } from "../context/OwnerProvider";
 import React, { useContext, useEffect, useState } from "react";
 import { Authorisation } from "../context/AppProvider";
 import OwnerModal from "./owner/modal";
+import OwnerReset from "./owner/reset";
 import OwnerTable from "./owner/table";
 import OwnerHistory from './owner/history';
 
@@ -47,9 +48,7 @@ export default function Owner () {
 
     return (
         <>
-            <p className="text-center mt-4" style={{fontSize: "18px"}}>
-                <button type="button" className="btn btn-light border px-3 py-2" onClick={reset}>Reset Contract</button>
-            </p>
+            <OwnerReset reset={reset}/>
             <OwnerTable rows={rows} onOpen={onOpen} onOpenHistory={onOpenHistory} acceptAuthorisation={acceptAuthorisation} rejectAuthorisation={rejectAuthorisation}/>
             <OwnerModal checkAddress={checkAddress} rows={rows} isOpen={isOpen} onOpenChange={onOpenChange} createAuthorisation={createAuthorisation}/>
             <OwnerHistory accesses={accesses} isOpenHistory={isOpenHistory} onCloseHistory={onCloseHistory} />
