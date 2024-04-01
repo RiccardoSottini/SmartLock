@@ -23,7 +23,7 @@ export default function Owner () {
             key: index,
             name: value.name,
             guest: value.guest,
-            link: "https://mumbai.polygonscan.com/address/" + value.guest,
+            link: "https://www.oklink.com/amoy/address/" + value.guest,
             timestamp:  value.timestamp,
             status: value.status,
             avatar: makeBlockie(value.guest)
