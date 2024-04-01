@@ -38,8 +38,9 @@ Replace <NETWORK> with either mumbai (test network) or mainnet (main network)
 
 ## Step 5: Run evaluation script
 The script is used for evaluating the transaction confirmation time based on the gas fee price set.
-The evaluation script can be run with the following command:
+Setting up the evaluation and running the script is done with the following commands:
 ```
+npx hardhat vars set CONTRACT_ADDRESS
 npx hardhat run scripts/evaluate.js --network <NETWORK>
 ```
 Replace <NETWORK> with either mumbai (test network) or mainnet (main network)

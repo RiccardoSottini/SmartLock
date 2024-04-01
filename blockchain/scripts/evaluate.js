@@ -1,4 +1,4 @@
-const CONTRACT_ADDRESS = "0x8701B311CAd384D7DB2Fa63b6179ae942707e4a4";
+const CONTRACT_ADDRESS = vars.get("CONTRACT_ADDRESS");;
 
 async function main() {
     const SmartDoor = await ethers.getContractFactory("SmartDoor");
