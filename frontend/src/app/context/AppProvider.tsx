@@ -18,7 +18,7 @@ const WEB3_PROVIDER = config.provider_endpoint;
 
 export const MAX_GAS_FEE = 10000000;
 export const GAS_PRICE = 1000000015;
-export const CHAIN_ID : bigint = BigInt(137);
+export const CHAIN_ID : bigint = BigInt(80002);
 
 export enum Status {
   NULL = 0,
