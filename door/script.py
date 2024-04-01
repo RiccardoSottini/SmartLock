@@ -8,7 +8,6 @@ import json
 GPIO.setwarnings(False) # Set GPIO warnings off
 GPIO.setmode(GPIO.BCM)  # Set GPIO mode to Broadcom SOC Channel (BCM)
 
-# SmartDoor class definition
 class SmartDoor:
     GPIO_LED = 17       # GPIO number for the LED
     GPIO_LOCK = 18      # GPIO number for the Lock
@@ -27,7 +26,7 @@ class SmartDoor:
         GPIO.setup(self.GPIO_LOCK, GPIO.OUT)
 
     # Function open_door - function used to open the lock (communicate with GPIO pins)
-    def open_door(self):
+    def open_door(self, event):
         # GPIO signals set to HIGH - power on the LED, open the lock
         GPIO.output(self.GPIO_LED, 1)
         GPIO.output(self.GPIO_LOCK, 1)
@@ -39,25 +38,20 @@ class SmartDoor:
         GPIO.output(self.GPIO_LED, 0)
         GPIO.output(self.GPIO_LOCK, 0)
 
-    # Function handle_event - function used to handle a contract event
-    def handle_event(self, event):
-        # Call the function to open the door
-        self.open_door()
-
     # Function log_loop - function used to fetch incoming events from the contract
     async def log_loop(self, event_filter, poll_interval):
         # Loop the event loop until program terminates
         while True:
-            # Loop through the new entries of the "newAccess" event and pass them in the handle_event function
+            # Loop through the new entries of the "newAccess" event and pass them in the open_door function
             for newAccess in event_filter.get_new_entries():
-                self.handle_event(newAccess)
+                self.open_door(newAccess)
 
             # Retrieve again the events after a poll interval
             await asyncio.sleep(poll_interval)
 
     # Function run - function used to start the event loop
     def run(self):
-        # Setup an event filter fetching from the latest block - setup event loop
+        # Subscribe to an event listener fetching from the latest block
         event_filter = self.contract.events.newAccess().create_filter(fromBlock='latest')
         loop = asyncio.get_event_loop()
 
