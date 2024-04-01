@@ -4,6 +4,7 @@ import React, { createContext, useState, useEffect, Dispatch, SetStateAction} fr
 import detectEthereumProvider from '@metamask/detect-provider';
 import { MetaMaskInpageProvider } from '@metamask/providers';
 import Web3 from "web3";
+import config from '../includes/config.json' assert { type: 'json' };
 
 declare global {
   interface Window {
@@ -11,13 +12,13 @@ declare global {
   }
 }
 
-const CONTRACT_ADDRESS = "0x8701B311CAd384D7DB2Fa63b6179ae942707e4a4";
-const CONTRACT_ABI = require("../includes/contract_abi.json");
-const WEB3_PROVIDER = "wss://rough-solitary-gas.matic-testnet.quiknode.pro/95a66b31d01626a4af842562f3d780388e4e97e9/"
+const CONTRACT_ADDRESS = config.contract_address;
+const CONTRACT_ABI = config.contract_abi;
+const WEB3_PROVIDER = config.provider_endpoint;
 
 export const MAX_GAS_FEE = 10000000;
 export const GAS_PRICE = 1000000015;
-export const CHAIN_ID : bigint = BigInt(80001);
+export const CHAIN_ID : bigint = BigInt(137);
 
 export enum Status {
   NULL = 0,
