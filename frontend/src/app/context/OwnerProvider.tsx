@@ -1,7 +1,7 @@
 "use client"
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { AppContext, Authorisation, Status, AccessType, GAS_FEE } from "./AppProvider";
+import { AppContext, Authorisation, Status, AccessType, MAX_GAS_FEE } from "./AppProvider";
 
 export type OwnerContextType = {
   data: Authorisation[];
@@ -90,7 +90,7 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
     if(checkChain(chainId)) {
       blockchain.contract_send.methods.createAuthorisation(name, guest).send({
         from: wallet.account,
-        gas: blockchain.web3_send.utils.toHex(GAS_FEE)
+        gas: blockchain.web3_send.utils.toHex(MAX_GAS_FEE)
       }).catch((error : any) => {
         console.log(error);
       });
@@ -106,7 +106,7 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
     if(checkChain(chainId)) {
       blockchain.contract_send.methods.acceptAuthorisation(guest).send({
         from: wallet.account,
-        gas: blockchain.web3_send.utils.toHex(GAS_FEE)
+        gas: blockchain.web3_send.utils.toHex(MAX_GAS_FEE)
       }).catch((error : any) => {
         console.log(error);
       });
@@ -122,7 +122,7 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
     if(checkChain(chainId)) {
       blockchain.contract_send.methods.rejectAuthorisation(guest).send({
         from: wallet.account,
-        gas: blockchain.web3_send.utils.toHex(GAS_FEE)
+        gas: blockchain.web3_send.utils.toHex(MAX_GAS_FEE)
       }).catch((error : any) => {
         console.log(error);
       });
@@ -138,7 +138,7 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
     if(checkChain(chainId)) {
       blockchain.contract_send.methods.reset().send({
         from: wallet.account,
-        gas: blockchain.web3_send.utils.toHex(GAS_FEE)
+        gas: blockchain.web3_send.utils.toHex(MAX_GAS_FEE)
       }).catch((error : any) => {
         console.log(error);
       });

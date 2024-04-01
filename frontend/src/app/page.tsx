@@ -10,9 +10,14 @@ import Owner from './components/owner';
 import Guest from './components/guest';
 import { GuestProvider } from './context/GuestProvider';
 import { OwnerProvider } from './context/OwnerProvider';
+import { useReportWebVitals } from 'next/web-vitals'
 
 export default function Home() {
   const { isConnected, isLoading, wallet, role, error, setError, errorMessage } = useContext(AppContext);
+
+  useReportWebVitals((metric) => {
+    console.log(metric)
+  })
 
   return (
     <NextUIProvider>

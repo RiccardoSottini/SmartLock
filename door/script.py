@@ -40,7 +40,7 @@ class SmartDoor:
 
     # Function log_loop - function used to fetch incoming events from the contract
     async def log_loop(self, event_filter, poll_interval):
-        # Loop the event loop until program terminates
+        # Event loop runs until program terminates
         while True:
             # Loop through the new entries of the "newAccess" event and pass them in the open_door function
             for newAccess in event_filter.get_new_entries():

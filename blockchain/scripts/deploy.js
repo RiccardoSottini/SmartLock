@@ -1,16 +1,15 @@
 async function main() {
+  const [deployer] = await ethers.getSigners();
 
-    const [deployer] = await ethers.getSigners();
-
-    console.log(
+  console.log(
     "Deploying contracts with the account:",
     deployer.address
-    );
+  );
 
-    const HelloWorld = await ethers.getContractFactory("SmartDoor");
-    const contract = await HelloWorld.deploy();
+  const SmartDoor = await ethers.getContractFactory("SmartDoor");
+  const contract = await SmartDoor.deploy();
 
-    console.log("Contract deployed at:", contract.address);
+  console.log("Contract deployed at:", contract.address);
 }
 
 main()
