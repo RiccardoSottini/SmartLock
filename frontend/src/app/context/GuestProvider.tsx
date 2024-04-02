@@ -1,7 +1,7 @@
 "use client"
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { AppContext, Authorisation, AccessType, Status, MAX_GAS_FEE /*, GAS_PRICE*/ } from "./AppProvider";
+import { AppContext, Authorisation, AccessType, Status, MAX_GAS_FEE, GAS_PRICE } from "./AppProvider";
 
 export type GuestContextType = {
   authorisation: Authorisation;
@@ -97,7 +97,7 @@ export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {
       blockchain.contract_send.methods.accessDoor().send({
         from: wallet.account,
         gas: blockchain.web3_send.utils.toHex(MAX_GAS_FEE),
-        //gasPrice: blockchain.web3_send.utils.toHex(GAS_PRICE)
+        gasPrice: blockchain.web3_send.utils.toHex(GAS_PRICE)
       }).catch((error : any) => {
         console.log(error);
       });
