@@ -1,3 +1,5 @@
+const GAS_PRICE = ethers.utils.parseUnits('5', 'gwei');
+
 async function main() {
   const [deployer] = await ethers.getSigners();
 
@@ -7,7 +9,7 @@ async function main() {
   );
 
   const SmartDoor = await ethers.getContractFactory("SmartDoor");
-  const contract = await SmartDoor.deploy();
+  const contract = await SmartDoor.deploy({ gasPrice: GAS_PRICE });
 
   console.log("Contract deployed at:", contract.address);
 }

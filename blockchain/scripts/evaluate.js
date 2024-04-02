@@ -1,6 +1,15 @@
-const CONTRACT_ADDRESS = "0x3A9bE092739cc2511BEDf088Fab97044AD98b8aB";
+const config = require('../includes/config.json');
+
+const PRIVATE_KEY = config.private_key;
+const CONTRACT_ADDRESS = config.contract_address;
+const CONTRACT_ABI = config.contract_abi;
+const HTTP_PROVIDER = config.provider_endpoint_send;
+const WSS_PROVIDER = config.provider_endpoint_fetch;
+
 const REQUESTS = 25;
-const TIMEOUT = 5000;
+const MAX_GAS_FEE = 10000000;
+const GAS_PRICE = ethers.utils.parseUnits('10', 'gwei');
+
 let receivedTimes = [], sentTimes = [];
 
 async function receive(contract) {
@@ -13,30 +22,38 @@ async function receive(contract) {
   });
 }
 
-async function send(contract) {
+async function send(contract, httpProvider) {
   for(let index = 0; index < REQUESTS; index++) {
     console.log("Sent: Request n. " + (sentTimes.length + 1));
 
-    await contract.accessDoor();
+    const transaction = await contract.accessDoor({ gasLimit: MAX_GAS_FEE, gasPrice: GAS_PRICE });
 
     sentTimes.push(Date.now());
 
-    await timer(TIMEOUT);
+    await transaction.wait();
   }
 }
 
 async function poll() {
   while(sentTimes.length < REQUESTS || receivedTimes.length < REQUESTS) {
-    await timer(100);
+    await timer(10);
   }
 }
 
 async function main() {
-  const SmartDoor = await ethers.getContractFactory("SmartDoor");
-  const contract = await SmartDoor.attach(CONTRACT_ADDRESS);
+  const wallet = new ethers.Wallet(PRIVATE_KEY);
 
-  await receive(contract);
-  await send(contract);
+  const httpProvider = new ethers.providers.JsonRpcProvider(HTTP_PROVIDER);
+  const httpSigner = wallet.connect(httpProvider);
+
+  const wssProvider = new ethers.providers.WebSocketProvider(WSS_PROVIDER);
+  const wssSigner = wssProvider.getSigner();
+
+  const contract_send = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, httpSigner);
+  const contract_fetch = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, wssSigner);
+
+  await receive(contract_fetch);
+  await send(contract_send, httpProvider);
   await poll();
 
   results = [];

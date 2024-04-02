@@ -109,7 +109,7 @@ export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {
 
   const setupListener = () => {
     blockchain.contract_fetch.events.updateGuest({filter: wallet.account.toLowerCase()}).on("data", (event : any) => { 
-        refresh();
+      refresh();
     });
 
     blockchain.contract_fetch.events.newReset().on("data", (event : any) => { 
