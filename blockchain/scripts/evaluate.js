@@ -22,7 +22,7 @@ async function receive(contract) {
   });
 }
 
-async function send(contract, httpProvider) {
+async function send(contract) {
   for(let index = 0; index < REQUESTS; index++) {
     console.log("Sent: Request n. " + (sentTimes.length + 1));
 
@@ -53,7 +53,7 @@ async function main() {
   const contract_fetch = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, wssSigner);
 
   await receive(contract_fetch);
-  await send(contract_send, httpProvider);
+  await send(contract_send);
   await poll();
 
   results = [];
