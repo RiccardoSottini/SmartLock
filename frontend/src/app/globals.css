@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import '@fortawesome/fontawesome-svg-core/styles.css';
+@import "@fortawesome/fontawesome-svg-core/styles.css";
 
 :root {
   --foreground-rgb: 0, 0, 0;

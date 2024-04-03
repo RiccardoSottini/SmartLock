@@ -1,10 +1,16 @@
-"use client"
+"use client";
 
-import React, { createContext, useState, useEffect, Dispatch, SetStateAction} from 'react';
-import detectEthereumProvider from '@metamask/detect-provider';
-import { MetaMaskInpageProvider } from '@metamask/providers';
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  Dispatch,
+  SetStateAction,
+} from "react";
+import detectEthereumProvider from "@metamask/detect-provider";
+import { MetaMaskInpageProvider } from "@metamask/providers";
 import Web3 from "web3";
-import config from '../includes/config.json' assert { type: 'json' };
+import config from "../includes/config.json" assert { type: "json" };
 
 declare global {
   interface Window {
@@ -18,13 +24,13 @@ const WEB3_PROVIDER = config.provider_endpoint;
 
 export const MAX_GAS_FEE = 10000000;
 export const GAS_PRICE = 10000000015;
-export const CHAIN_ID : bigint = BigInt(80002);
+export const CHAIN_ID: bigint = BigInt(80002);
 
 export enum Status {
   NULL = 0,
-  PENDING = 1, 
-  ACCEPTED = 2, 
-  REJECTED = 3
+  PENDING = 1,
+  ACCEPTED = 2,
+  REJECTED = 3,
 }
 
 export type Authorisation = {
@@ -32,19 +38,19 @@ export type Authorisation = {
   guest: string;
   name: string;
   status: Status;
-}
+};
 
 export type AccessType = {
   timestamp: string;
   guest: string;
-}
+};
 
 export type Blockchain = {
   web3_send: any;
   web3_fetch: any;
   contract_send: any;
   contract_fetch: any;
-}
+};
 
 export type Wallet = {
   account: string;
@@ -54,7 +60,7 @@ export type Wallet = {
 export enum Role {
   NULL = 0,
   OWNER = 1,
-  GUEST = 2
+  GUEST = 2,
 }
 
 export type AppContextType = {
@@ -65,7 +71,7 @@ export type AppContextType = {
   errorMessage: string;
   setError: Dispatch<SetStateAction<boolean>>;
   setErrorMessage: Dispatch<SetStateAction<string>>;
-  
+
   blockchain: Blockchain;
   wallet: Wallet;
   role: Role;
@@ -82,12 +88,17 @@ export const AppContext = createContext<AppContextType>({
   errorMessage: "",
   setError: () => {},
   setErrorMessage: () => {},
-  blockchain: { web3_send: null, web3_fetch: null, contract_send: null, contract_fetch: null },
+  blockchain: {
+    web3_send: null,
+    web3_fetch: null,
+    contract_send: null,
+    contract_fetch: null,
+  },
   wallet: { account: "", balance: "" },
   role: Role.NULL,
   connectWallet: () => {},
   refreshWallet: () => {},
-  checkChain: (chainId: bigint) => true
+  checkChain: (chainId: bigint) => true,
 });
 
 interface AppProviderProps {
@@ -100,9 +111,14 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [isConnecting, setConnecting] = useState<boolean>(false);
 
   const [error, setError] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>("");  
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
-  const [blockchain, setBlockchain] = useState<Blockchain>({ web3_send: null, web3_fetch: null, contract_send: null, contract_fetch: null });
+  const [blockchain, setBlockchain] = useState<Blockchain>({
+    web3_send: null,
+    web3_fetch: null,
+    contract_send: null,
+    contract_fetch: null,
+  });
   const [wallet, setWallet] = useState<Wallet>({ account: "", balance: "" });
   const [role, setRole] = useState<Role>(Role.NULL);
 
@@ -111,17 +127,17 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    if(blockchain.web3_send != null && blockchain.web3_fetch != null) {
+    if (blockchain.web3_send != null && blockchain.web3_fetch != null) {
       setupProvider();
 
       return () => {
-        window.ethereum?.removeListener('accountsChanged', updateAccounts);
-      }
+        window.ethereum?.removeListener("accountsChanged", updateAccounts);
+      };
     }
   }, [blockchain]);
 
   useEffect(() => {
-    if(isConnected) {
+    if (isConnected) {
       refreshWallet();
     }
   }, [isConnected]);
@@ -132,22 +148,27 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
     setBlockchain({
       web3_send: web3_send,
-      web3_fetch: web3_fetch, 
+      web3_fetch: web3_fetch,
       contract_send: new web3_send.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS),
-      contract_fetch: new web3_fetch.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS)
+      contract_fetch: new web3_fetch.eth.Contract(
+        CONTRACT_ABI,
+        CONTRACT_ADDRESS
+      ),
     });
-  }
+  };
 
   const setupProvider = async () => {
     const provider = await detectEthereumProvider({ silent: true });
 
     if (provider) {
-      const accounts = await window.ethereum?.request({ method: 'eth_accounts' });
+      const accounts = await window.ethereum?.request({
+        method: "eth_accounts",
+      });
       updateAccounts(accounts);
 
-      window.ethereum?.on('accountsChanged', updateAccounts);
+      window.ethereum?.on("accountsChanged", updateAccounts);
     }
-  }
+  };
 
   const updateAccounts = async (accounts: any) => {
     if (accounts.length > 0) {
@@ -158,55 +179,63 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
 
     setTimeout(() => setLoading(false), 1000);
-  }
+  };
 
   const updateWallet = async (account: any) => {
-    const balance = formatBalance(await blockchain.web3_fetch.eth.getBalance(account, 'latest'));
+    const balance = formatBalance(
+      await blockchain.web3_fetch.eth.getBalance(account, "latest")
+    );
 
     getRole(account);
-    setWallet({ account: account, balance: Number.parseFloat(balance).toFixed(6) });
-  }
+    setWallet({
+      account: account,
+      balance: Number.parseFloat(balance).toFixed(6),
+    });
+  };
 
   const refreshWallet = () => {
-    if(wallet) {
+    if (wallet) {
       setInterval(() => {
         updateWallet(wallet.account);
       }, 5000);
     }
-  }
+  };
 
-  const connectWallet = async () => {                  
-    setConnecting(true); 
+  const connectWallet = async () => {
+    setConnecting(true);
 
-    await window.ethereum?.request({                    
-      method: "eth_requestAccounts"
-    }).then((accounts : any) => {                        
-      setError(false);                                   
-      updateAccounts(accounts);                           
-    }).catch((err : any) => {                              
-      setError(true);                                    
-      setErrorMessage(err.message);                      
-    });    
+    await window.ethereum
+      ?.request({
+        method: "eth_requestAccounts",
+      })
+      .then((accounts: any) => {
+        setError(false);
+        updateAccounts(accounts);
+      })
+      .catch((err: any) => {
+        setError(true);
+        setErrorMessage(err.message);
+      });
 
-    setConnecting(false); 
-  }
+    setConnecting(false);
+  };
 
   const getRole = async (account: any) => {
-    let result : Role = await blockchain.contract_fetch.methods.getRole().call({
-      from: account
+    let result: Role = await blockchain.contract_fetch.methods.getRole().call({
+      from: account,
     });
 
     setRole(result);
     setConnected(true);
-  }
+  };
 
   const formatBalance = (rawBalance: bigint) => {
-    return blockchain.web3_fetch.utils.fromWei(rawBalance, 'ether');
-  }
+    return blockchain.web3_fetch.utils.fromWei(rawBalance, "ether");
+  };
 
   const checkChain = (chainId: bigint) => {
     return chainId == CHAIN_ID;
-  }
+  };
 
   const contextValue: AppContextType = {
     isLoading,
@@ -222,12 +251,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     role,
     connectWallet,
     refreshWallet,
-    checkChain
+    checkChain,
   };
 
   return (
-    <AppContext.Provider value={contextValue}>
-      {children}
-    </AppContext.Provider>
+    <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>
   );
 };
