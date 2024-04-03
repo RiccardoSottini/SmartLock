@@ -33,10 +33,17 @@ It can be done by typing the following command:
 npx hardhat run scripts/deploy.js --network amoy
 ```
 
-## Step 5: Run evaluation script
+## Step 5: Run the evaluation script
 The script is used for evaluating the transaction confirmation time based on the gas fee price set.
-Setting up the evaluation and running the script is done with the following commands:
+The script needs to be configured by setting up the following configuration variables in includes/config.json:
+- user_address
+- private_key
+- provider_endpoint_send
+- provider_endpoint_fetch
+- contract_address
+- contract_abi
+
+The evaluation script can be run with the following command:
 ```
-npx hardhat vars set CONTRACT_ADDRESS
 npx hardhat run scripts/evaluate.js --network amoy
 ```
