@@ -7,7 +7,7 @@ const CONTRACT_ABI = config.contract_abi;
 const HTTP_PROVIDER = config.provider_endpoint_send;
 const WSS_PROVIDER = config.provider_endpoint_fetch;
 
-const REQUESTS = 2;
+const REQUESTS = 25;
 const MAX_GAS_FEE = 10000000;
 const GAS_PRICE = ethers.utils.parseUnits('10', 'gwei');
 
