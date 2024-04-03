@@ -10,6 +10,7 @@ import {
   GAS_PRICE,
 } from "./AppProvider";
 
+/* Data structure definition returned by the Context */
 export type GuestContextType = {
   authorisation: Authorisation;
   accesses: AccessType[];
@@ -17,6 +18,7 @@ export type GuestContextType = {
   accessDoor: () => void;
 };
 
+/* Setup initial values of the Context */
 export const GuestContext = createContext<GuestContextType>({
   authorisation: { timestamp: "", guest: "", name: "", status: Status.NULL },
   accesses: [],
@@ -24,11 +26,14 @@ export const GuestContext = createContext<GuestContextType>({
   accessDoor: () => {},
 });
 
+/* Props for the GuestProvider */
 interface GuestProviderProps {
   children: React.ReactNode;
 }
 
+/* GuestProvider Context definition */
 export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {
+  /* Load App Context */
   const {
     isConnected,
     setError,
@@ -38,6 +43,7 @@ export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {
     checkChain,
   } = useContext(AppContext);
 
+  /* Context variables definition */
   const [authorisation, setAuthorisation] = useState<Authorisation>({
     timestamp: "",
     guest: "",
@@ -46,6 +52,7 @@ export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {
   });
   const [accesses, setAccesses] = useState<AccessType[]>([]);
 
+  /* React Hook ran when the wallet connection is completed */
   useEffect(() => {
     if (isConnected) {
       setupListener();
@@ -54,16 +61,19 @@ export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {
     }
   }, [isConnected]);
 
+  /* React Hook ran when the authorisation is retrieved */
   useEffect(() => {
     if (authorisation.status == Status.ACCEPTED) {
       getAccesses();
     }
   }, [authorisation]);
 
+  /* Function used to refresh data */
   const refresh = async () => {
     getAuthorisation();
   };
 
+  /* Function used to get the authorisation retrieving it from the blockchain */
   const getAuthorisation = async () => {
     let result: Authorisation = await blockchain.contract_fetch.methods
       .getAuthorisation()
@@ -78,6 +88,7 @@ export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {
     } as Authorisation);
   };
 
+  /* Function used to get the door accessess retrieving them from the blockchain */
   const getAccesses = async () => {
     let result: AccessType[] = await blockchain.contract_fetch.methods
       .getAccesses()
@@ -97,6 +108,7 @@ export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {
     setAccesses(resultAccesses.reverse());
   };
 
+  /* Function used to request an authorisation  */
   const requestAuthorisation = async (name: string) => {
     const chainId: bigint = await blockchain.web3_send.eth.getChainId();
 
@@ -116,6 +128,7 @@ export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {
     }
   };
 
+  /* Function used to access the door  */
   const accessDoor = async () => {
     const chainId: bigint = await blockchain.web3_send.eth.getChainId();
 
@@ -136,6 +149,7 @@ export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {
     }
   };
 
+  /* Function used to setup event listeners */
   const setupListener = () => {
     blockchain.contract_fetch.events
       .updateGuest({ filter: wallet.account.toLowerCase() })
@@ -148,6 +162,7 @@ export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {
     });
   };
 
+  /* Setup return value of the Context */
   const contextValue: GuestContextType = {
     authorisation,
     accesses,
@@ -155,6 +170,7 @@ export const GuestProvider: React.FC<GuestProviderProps> = ({ children }) => {
     accessDoor,
   };
 
+  /* Return the Context value */
   return (
     <GuestContext.Provider value={contextValue}>
       {children}

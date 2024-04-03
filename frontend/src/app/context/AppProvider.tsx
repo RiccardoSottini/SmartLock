@@ -12,20 +12,24 @@ import { MetaMaskInpageProvider } from "@metamask/providers";
 import Web3 from "web3";
 import config from "../includes/config.json" assert { type: "json" };
 
+/* Setup TypeScript to expect MetaMask provider */
 declare global {
   interface Window {
     ethereum?: MetaMaskInpageProvider;
   }
 }
 
+/* Configuration variables */
 const CONTRACT_ADDRESS = config.contract_address;
 const CONTRACT_ABI = config.contract_abi;
 const WEB3_PROVIDER = config.provider_endpoint;
 
+/* Blockchain related configuration constants */
 export const MAX_GAS_FEE = 10000000;
 export const GAS_PRICE = 10000000015;
 export const CHAIN_ID: bigint = BigInt(80002);
 
+/* Status enumeration (NULL / PENDING / ACCEPTED / REJECTED) */
 export enum Status {
   NULL = 0,
   PENDING = 1,
@@ -33,6 +37,14 @@ export enum Status {
   REJECTED = 3,
 }
 
+/* User Role enumeration (NULL / OWNER / GUEST) */
+export enum Role {
+  NULL = 0,
+  OWNER = 1,
+  GUEST = 2,
+}
+
+/* Authorisation data structure (timestamp, guest, name, status) */
 export type Authorisation = {
   timestamp: string;
   guest: string;
@@ -40,11 +52,13 @@ export type Authorisation = {
   status: Status;
 };
 
+/* Access data structure (timestamp, guest) */
 export type AccessType = {
   timestamp: string;
   guest: string;
 };
 
+/* Blockchain web3 and contract instances */
 export type Blockchain = {
   web3_send: any;
   web3_fetch: any;
@@ -52,17 +66,13 @@ export type Blockchain = {
   contract_fetch: any;
 };
 
+/* Wallet data structure (account, balance) */
 export type Wallet = {
   account: string;
   balance: string;
 };
 
-export enum Role {
-  NULL = 0,
-  OWNER = 1,
-  GUEST = 2,
-}
-
+/* Data structure definition returned by the Context */
 export type AppContextType = {
   isLoading: boolean;
   isConnected: boolean;
@@ -71,7 +81,6 @@ export type AppContextType = {
   errorMessage: string;
   setError: Dispatch<SetStateAction<boolean>>;
   setErrorMessage: Dispatch<SetStateAction<string>>;
-
   blockchain: Blockchain;
   wallet: Wallet;
   role: Role;
@@ -80,6 +89,7 @@ export type AppContextType = {
   checkChain: (chainId: bigint) => boolean;
 };
 
+/* Setup initial values of the Context */
 export const AppContext = createContext<AppContextType>({
   isLoading: true,
   isConnected: false,
@@ -101,18 +111,19 @@ export const AppContext = createContext<AppContextType>({
   checkChain: (chainId: bigint) => true,
 });
 
+/* Props for the AppProvider */
 interface AppProviderProps {
   children: React.ReactNode;
 }
 
+/* AppProvider Context definition */
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
+  /* Context variables definition */
   const [isLoading, setLoading] = useState<boolean>(true);
   const [isConnected, setConnected] = useState<boolean>(false);
   const [isConnecting, setConnecting] = useState<boolean>(false);
-
   const [error, setError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
-
   const [blockchain, setBlockchain] = useState<Blockchain>({
     web3_send: null,
     web3_fetch: null,
@@ -122,10 +133,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [wallet, setWallet] = useState<Wallet>({ account: "", balance: "" });
   const [role, setRole] = useState<Role>(Role.NULL);
 
+  /* React Hook ran when Context is loaded */
   useEffect(() => {
     setupBlockchain();
   }, []);
 
+  /* React Hook ran when blockchain object is updated */
   useEffect(() => {
     if (blockchain.web3_send != null && blockchain.web3_fetch != null) {
       setupProvider();
@@ -136,12 +149,14 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   }, [blockchain]);
 
+  /* React Hook ran when the wallet connection is completed */
   useEffect(() => {
     if (isConnected) {
       refreshWallet();
     }
   }, [isConnected]);
 
+  /* Function used to setup the blockchain instances */
   const setupBlockchain = async () => {
     const web3_send = new Web3(window.ethereum);
     const web3_fetch = new Web3(WEB3_PROVIDER);
@@ -157,6 +172,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     });
   };
 
+  /* Function used to setup the blockchain provider */
   const setupProvider = async () => {
     const provider = await detectEthereumProvider({ silent: true });
 
@@ -170,6 +186,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   };
 
+  /* Function used to get the data stored about the wallet's accounts */
   const updateAccounts = async (accounts: any) => {
     if (accounts.length > 0) {
       updateWallet(accounts[0]);
@@ -181,6 +198,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setTimeout(() => setLoading(false), 1000);
   };
 
+  /* Function used to get data about the wallet */
   const updateWallet = async (account: any) => {
     const balance = formatBalance(
       await blockchain.web3_fetch.eth.getBalance(account, "latest")
@@ -193,6 +211,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     });
   };
 
+  /* Function used to refresh data about the wallet */
   const refreshWallet = () => {
     if (wallet) {
       setInterval(() => {
@@ -201,6 +220,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   };
 
+  /* Function used to connect to the wallet */
   const connectWallet = async () => {
     setConnecting(true);
 
@@ -220,6 +240,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setConnecting(false);
   };
 
+  /* Function used to get the user Role */
   const getRole = async (account: any) => {
     let result: Role = await blockchain.contract_fetch.methods.getRole().call({
       from: account,
@@ -229,14 +250,17 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setConnected(true);
   };
 
+  /* Function used to format the balance of the wallet */
   const formatBalance = (rawBalance: bigint) => {
     return blockchain.web3_fetch.utils.fromWei(rawBalance, "ether");
   };
 
+  /* Function used to check the chain id of the network the wallet is connected to */
   const checkChain = (chainId: bigint) => {
     return chainId == CHAIN_ID;
   };
 
+  /* Setup return value of the Context */
   const contextValue: AppContextType = {
     isLoading,
     isConnected,
@@ -245,7 +269,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     errorMessage,
     setError,
     setErrorMessage,
-
     blockchain,
     wallet,
     role,
@@ -254,6 +277,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     checkChain,
   };
 
+  /* Return the Context value */
   return (
     <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>
   );

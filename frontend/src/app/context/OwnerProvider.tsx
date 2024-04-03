@@ -9,6 +9,7 @@ import {
   MAX_GAS_FEE,
 } from "./AppProvider";
 
+/* Data structure definition returned by the Context */
 export type OwnerContextType = {
   data: Authorisation[];
   createAuthorisation: (name: string, guest: string) => void;
@@ -19,6 +20,7 @@ export type OwnerContextType = {
   getAccesses: (guest: string) => Promise<AccessType[]>;
 };
 
+/* Setup initial values of the Context */
 export const OwnerContext = createContext<OwnerContextType>({
   data: [],
   createAuthorisation: (name: string, guest: string) => {},
@@ -29,11 +31,14 @@ export const OwnerContext = createContext<OwnerContextType>({
   getAccesses: (guest: string) => new Promise(() => {}),
 });
 
+/* Props for the OwnerProvider */
 interface OwnerProviderProps {
   children: React.ReactNode;
 }
 
+/* OwnerProvider Context definition */
 export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
+  /* Load App Context */
   const {
     isConnected,
     setError,
@@ -43,8 +48,10 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
     checkChain,
   } = useContext(AppContext);
 
+  /* Context variables definition */
   const [data, setData] = useState<Authorisation[]>([]);
 
+  /* React Hook ran when the wallet connection is completed */
   useEffect(() => {
     if (isConnected) {
       setupListener();
@@ -53,14 +60,12 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
     }
   }, [isConnected]);
 
-  /*useEffect(() => {
-    console.log(data);
-  }, [data]);*/
-
+  /* Function used to refresh data */
   const refresh = async () => {
     getData();
   };
 
+  /* Function used to get all authorisations from the blockchain */
   const getData = async () => {
     let result: Authorisation[] = await blockchain.contract_fetch.methods
       .getData()
@@ -82,6 +87,7 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
     setData(authorisations);
   };
 
+  /* Function used to get the door accessess of a guest retrieving them from the blockchain */
   const getAccesses = async (guest: string) => {
     let result: AccessType[] = await blockchain.contract_fetch.methods
       .getAccesses(guest)
@@ -101,6 +107,7 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
     return resultAccesses.reverse();
   };
 
+  /* Function used to create an authorisation  */
   const createAuthorisation = async (name: string, guest: string) => {
     const chainId: bigint = await blockchain.web3_send.eth.getChainId();
 
@@ -120,6 +127,7 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
     }
   };
 
+  /* Function used to accept an authorisation  */
   const acceptAuthorisation = async (guest: string) => {
     const chainId: bigint = await blockchain.web3_send.eth.getChainId();
 
@@ -139,6 +147,7 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
     }
   };
 
+  /* Function used to reject an authorisation  */
   const rejectAuthorisation = async (guest: string) => {
     const chainId: bigint = await blockchain.web3_send.eth.getChainId();
 
@@ -158,6 +167,7 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
     }
   };
 
+  /* Function used to reset the contract  */
   const reset = async () => {
     const chainId: bigint = await blockchain.web3_send.eth.getChainId();
 
@@ -177,15 +187,18 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
     }
   };
 
+  /* Function used to setup event listeners */
   const setupListener = () => {
     blockchain.contract_fetch.events.updateOwner().on("data", (event: any) => {
       refresh();
     });
   };
 
+  /* Function used to check validity of an address */
   const checkAddress = (address: string) =>
     blockchain.web3_fetch.utils.isAddress(address);
 
+  /* Setup return value of the Context */
   const contextValue: OwnerContextType = {
     data,
     createAuthorisation,
@@ -196,6 +209,7 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
     getAccesses,
   };
 
+  /* Return the Context value */
   return (
     <OwnerContext.Provider value={contextValue}>
       {children}

@@ -10,9 +10,10 @@ import Owner from "./components/owner";
 import Guest from "./components/guest";
 import { GuestProvider } from "./context/GuestProvider";
 import { OwnerProvider } from "./context/OwnerProvider";
-import { useReportWebVitals } from "next/web-vitals";
 
+/* Home React component - root page */
 export default function Home() {
+  /* Load App Context */
   const {
     isConnected,
     isLoading,
@@ -23,6 +24,7 @@ export default function Home() {
     errorMessage,
   } = useContext(AppContext);
 
+  /* JSX markup */
   return (
     <NextUIProvider>
       <Header />
