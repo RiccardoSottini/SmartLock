@@ -1,7 +1,7 @@
 # 2024 Final Year Project
-Blockchain-operated Smart-Lock
-Riccardo Sottini
-Aston University
+Blockchain-operated Smart-Lock  
+Riccardo Sottini  
+Aston University  
 
 ## Setup the system
 Follow the following steps:
