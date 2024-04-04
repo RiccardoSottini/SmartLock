@@ -10,7 +10,9 @@ import OwnerReset from "./owner/reset";
 import OwnerTable from "./owner/table";
 import OwnerHistory from "./owner/history";
 
+/* Owner React component - page for the Owner */
 export default function Owner() {
+  /* Load Owner Context */
   const {
     checkAddress,
     reset,
@@ -20,13 +22,17 @@ export default function Owner() {
     acceptAuthorisation,
     rejectAuthorisation,
   } = useContext(OwnerContext);
+
+  /* Component variables definition */
   const [rows, setRows] = useState<any>([]);
   const [accesses, setAccesses] = useState<any>([]);
   const [guestValue, setGuest] = useState<any>(null);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [isOpenHistory, setOpenHistory] = useState<boolean>(false);
 
+  /* React Hook called everytime the list of authorisations is changed */
   useEffect(() => {
+    /* Set the value of the table rows by formatting each authorisation */
     setRows(
       data.map((value: Authorisation, index: number) => ({
         key: index,
@@ -39,23 +45,30 @@ export default function Owner() {
       }))
     );
 
+    /* Check if history modal is open */
     if (isOpenHistory) {
+      /* Call the function to display the history modal */
       onOpenHistory(guestValue);
     }
   }, [data]);
 
+  /* Function used to retrieve door accessess of a guest and display on the history modal */
   const onOpenHistory = async (guest: string) => {
+    /* Setup variables used to display the history modal */
     setGuest(guest);
     setAccesses(await getAccesses(guest));
     setOpenHistory(true);
   };
 
+  /* Function used to close the history modal */
   const onCloseHistory = () => {
+    /* Setup variables used to display the history modal with their initial values */
     setGuest(null);
     setAccesses([]);
     setOpenHistory(false);
   };
 
+  /* Return owner JSX markup */
   return (
     <>
       <OwnerReset reset={reset} />

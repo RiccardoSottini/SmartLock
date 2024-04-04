@@ -24,11 +24,13 @@ import {
   DropdownItem,
 } from "@nextui-org/react";
 
+/* Data structure definition of the table column (key, label) */
 export type ColumnType = {
   key: string;
   label: string;
 };
 
+/* Data structure definition of the possible authorisation statuses (value, name, color, display) */
 export type StatusType = {
   value: string;
   name: string;
@@ -43,6 +45,7 @@ export type StatusType = {
   display: boolean;
 };
 
+/* Define the list of table columns */
 const columns: ColumnType[] = [
   {
     key: "guest",
@@ -62,6 +65,7 @@ const columns: ColumnType[] = [
   },
 ];
 
+/* Define the list of the authorisation statuses */
 const statuses: StatusType[] = [
   {
     value: "NULL",
@@ -89,6 +93,7 @@ const statuses: StatusType[] = [
   },
 ];
 
+/* Props of the OwnerTable component */
 export type OwnerTableProps = {
   rows: any;
   onOpen: () => void;
@@ -97,6 +102,7 @@ export type OwnerTableProps = {
   rejectAuthorisation: (guest: string) => void;
 };
 
+/* OwnerTable React component - component used to display the table shown in the owner interface */
 export default function OwnerTable({
   rows,
   onOpen,
@@ -104,13 +110,18 @@ export default function OwnerTable({
   acceptAuthorisation,
   rejectAuthorisation,
 }: OwnerTableProps) {
+  /* Component variables definition */
   const [filterValue, setFilterValue] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<any>("all");
 
+  /* Filter rows every time data or status/filtering are changed */
   const filteredRows = useMemo(() => {
+    /* Initiate the list of filtered rows from the current list of rows */
     let filteredRows = [...rows];
 
+    /* Check if the value of the filter is not empty */
     if (filterValue != "") {
+      /* Filter list based on the filter value */
       filteredRows = filteredRows.filter(
         (row) =>
           row.name.toLowerCase().includes(filterValue.toLowerCase()) ||
@@ -118,25 +129,33 @@ export default function OwnerTable({
       );
     }
 
+    /* Check if the value of the status filter is not empty */
     if (
       statusFilter !== "all" &&
       Array.from(statusFilter).length !== statuses.length
     ) {
+      /* Filter list based on the status filter */
       filteredRows = filteredRows.filter((row) =>
         Array.from(statusFilter).includes(Status[row.status])
       );
     }
 
+    /* Return filtered rows */
     return filteredRows;
   }, [rows, filterValue, statusFilter]);
 
+  /* Function called when the value of the search filter is changed */
   const onSearchChange = useCallback((value: string) => {
+    /* Set filter value */
     setFilterValue(value);
   }, []);
 
+  /* Function used to display the value of a table cell based on the authorisation value and the column key */
   const renderCell = useCallback((authorisation: any, columnKey: string) => {
+    /* Retrieve cell value */
     const cellValue = authorisation[columnKey];
 
+    /* Return JSX markup based on the column key */
     switch (columnKey) {
       case "guest":
         return (
@@ -192,14 +211,17 @@ export default function OwnerTable({
           </Chip>
         );
       case "actions":
+        /* Initiate the list of disabled dropdown keys */
         let disabledKeys: string[] = ["history"];
 
+        /* Set the list of disabled keys based on the authorisation status */
         if (authorisation.status == Status.ACCEPTED) {
           disabledKeys = ["accept"];
         } else if (authorisation.status == Status.REJECTED) {
           disabledKeys = ["reject", "history"];
         }
 
+        /* Return actions JSX markup */
         return (
           <div className="relative flex justify-center items-center gap-2">
             <Dropdown className="bg-background border-1 border-default-200">
@@ -246,7 +268,9 @@ export default function OwnerTable({
     }
   }, []);
 
+  /* Calculate the JSX of the table top content - executed everytime data is changed */
   const topContent = useMemo(() => {
+    /* Return JSX markup */
     return (
       <div className="flex flex-col gap-4">
         <div className="flex justify-between gap-3 items-end">
@@ -305,6 +329,7 @@ export default function OwnerTable({
     );
   }, [filterValue, statusFilter, onSearchChange, setStatusFilter]);
 
+  /* Return component JSX markup (table with list of authorisations) */
   return (
     <>
       <div

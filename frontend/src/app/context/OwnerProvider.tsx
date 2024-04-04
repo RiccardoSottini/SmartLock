@@ -53,29 +53,37 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
 
   /* React Hook ran when the wallet connection is completed */
   useEffect(() => {
+    /* Check if the connection is completed */
     if (isConnected) {
+      /* Call the function to setup the contract event listeners */
       setupListener();
 
+      /* Call the function to refresh the data */
       refresh();
     }
   }, [isConnected]);
 
   /* Function used to refresh data */
   const refresh = async () => {
+    /* Call the function to retrieve all the authorisations */
     getData();
   };
 
   /* Function used to get all authorisations from the blockchain */
   const getData = async () => {
+    /* Call the contract method to retrieve the authorisations */
     let result: Authorisation[] = await blockchain.contract_fetch.methods
       .getData()
       .call({
         from: wallet.account,
       });
 
+    /* List storing the resulting authorisations after the explicit cast */
     let authorisations: Authorisation[] = [];
 
+    /* Loop through all the authorisations */
     result.forEach(function (authorisation) {
+      /* Set the authorisations with the value explicitely casted */
       authorisations.push({
         timestamp: authorisation.timestamp,
         guest: authorisation.guest,
@@ -84,34 +92,43 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
       });
     });
 
+    /* Set the value for the authorisations */
     setData(authorisations);
   };
 
   /* Function used to get the door accessess of a guest retrieving them from the blockchain */
   const getAccesses = async (guest: string) => {
+    /* Call the contract method to retrieve the door accesses of a guest */
     let result: AccessType[] = await blockchain.contract_fetch.methods
       .getAccesses(guest)
       .call({
         from: wallet.account,
       });
 
+    /* List storing the resulting door accessess after the explicit cast */
     let resultAccesses: AccessType[] = [];
 
+    /* Loop through all the door accessess */
     result.forEach(function (access) {
+      /* Set the door accesses with the value returned explicitely casted to AccessType */
       resultAccesses.push({
         timestamp: access.timestamp,
         guest: access.guest,
       } as AccessType);
     });
 
+    /* Return the list of accessess based on the reversed returned list */
     return resultAccesses.reverse();
   };
 
   /* Function used to create an authorisation  */
   const createAuthorisation = async (name: string, guest: string) => {
+    /* Retrieve the chain id of the network the wallet is connected to */
     const chainId: bigint = await blockchain.web3_send.eth.getChainId();
 
+    /* Check if the chain id is the correct one */
     if (checkChain(chainId)) {
+      /* Call the contract method to create an authorisation request - handle success and errors */
       blockchain.contract_send.methods
         .createAuthorisation(name, guest)
         .send({
@@ -122,6 +139,7 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
           console.log(error);
         });
     } else {
+      /* Set error saying to change the network */
       setError(true);
       setErrorMessage("Change network to create the authorisation");
     }
@@ -129,9 +147,12 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
 
   /* Function used to accept an authorisation  */
   const acceptAuthorisation = async (guest: string) => {
+    /* Retrieve the chain id of the network the wallet is connected to */
     const chainId: bigint = await blockchain.web3_send.eth.getChainId();
 
+    /* Check if the chain id is the correct one */
     if (checkChain(chainId)) {
+      /* Call the contract method to accept the authorisation request - handle success and errors */
       blockchain.contract_send.methods
         .acceptAuthorisation(guest)
         .send({
@@ -142,6 +163,7 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
           console.log(error);
         });
     } else {
+      /* Set error saying to change the network */
       setError(true);
       setErrorMessage("Change network to accept the request for authorisation");
     }
@@ -149,9 +171,12 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
 
   /* Function used to reject an authorisation  */
   const rejectAuthorisation = async (guest: string) => {
+    /* Retrieve the chain id of the network the wallet is connected to */
     const chainId: bigint = await blockchain.web3_send.eth.getChainId();
 
+    /* Check if the chain id is the correct one */
     if (checkChain(chainId)) {
+      /* Call the contract method to reject the authorisation request - handle success and errors */
       blockchain.contract_send.methods
         .rejectAuthorisation(guest)
         .send({
@@ -162,6 +187,7 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
           console.log(error);
         });
     } else {
+      /* Set error saying to change the network */
       setError(true);
       setErrorMessage("Change network to reject the request for authorisation");
     }
@@ -169,9 +195,12 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
 
   /* Function used to reset the contract  */
   const reset = async () => {
+    /* Retrieve the chain id of the network the wallet is connected to */
     const chainId: bigint = await blockchain.web3_send.eth.getChainId();
 
+    /* Check if the chain id is the correct one */
     if (checkChain(chainId)) {
+      /* Call the contract method to reset the contract - handle success and errors */
       blockchain.contract_send.methods
         .reset()
         .send({
@@ -182,6 +211,7 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
           console.log(error);
         });
     } else {
+      /* Set error saying to change the network */
       setError(true);
       setErrorMessage("Change network to reset the contract");
     }
@@ -189,6 +219,7 @@ export const OwnerProvider: React.FC<OwnerProviderProps> = ({ children }) => {
 
   /* Function used to setup event listeners */
   const setupListener = () => {
+    /* Setup event listener fetching updateOwner events - call refresh method when captured */
     blockchain.contract_fetch.events.updateOwner().on("data", (event: any) => {
       refresh();
     });

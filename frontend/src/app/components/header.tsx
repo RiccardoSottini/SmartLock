@@ -3,9 +3,12 @@
 import { useContext } from "react";
 import { AppContext } from "../context/AppProvider";
 
+/* Header React component - header component of the page */
 export default function Header() {
+  /* Load App Context */
   const { connectWallet, isConnected, isConnecting } = useContext(AppContext);
 
+  /* Return header JSX markup */
   return (
     <header
       id="navbar-main"

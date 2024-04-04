@@ -24,7 +24,7 @@ export default function Home() {
     errorMessage,
   } = useContext(AppContext);
 
-  /* JSX markup */
+  /* Return JSX markup */
   return (
     <NextUIProvider>
       <Header />

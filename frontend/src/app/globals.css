@@ -17,11 +17,13 @@
   }
 }
 
+/* Set the page colour */
 body {
   color: rgb(var(--foreground-rgb));
   background: "white";
 }
 
+/* Reduce size of the authorisation link when screen size is lower than 992px */
 @media only screen and (max-width: 992px) {
   .authentication_link {
     width: 200px;
@@ -33,12 +35,14 @@ body {
   }
 }
 
+/* Reduce size of the authorisation link when screen size is lower than 768px */
 @media only screen and (max-width: 768px) {
   .authentication_link {
     width: 100px;
   }
 }
 
+/* Set the margin and padding of the ul element */
 ul {
   margin-bottom: 0px !important;
   padding-left: 0px !important;

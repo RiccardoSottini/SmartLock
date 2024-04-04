@@ -9,6 +9,7 @@ import {
   Button,
 } from "@nextui-org/react";
 
+/* Props of the OwnerModal component */
 export type OwnerModalProps = {
   checkAddress: any;
   rows: any;
@@ -17,6 +18,7 @@ export type OwnerModalProps = {
   createAuthorisation: (guest: string, address: string) => void;
 };
 
+/* OwnerModal React component - component used to display the modal to create an authorisation */
 export default function OwnerModal({
   checkAddress,
   rows,
@@ -24,26 +26,34 @@ export default function OwnerModal({
   onOpenChange,
   createAuthorisation,
 }: OwnerModalProps) {
+  /* Component variables definition */
   const [name, setName] = useState<string | undefined>();
   const [address, setAddress] = useState<string | undefined>();
   const [errorName, setErrorName] = useState<string>("");
   const [errorAddress, setErrorAddress] = useState<string>("");
 
+  /* Function called when pressing the confirm button */
   const onPress = (onClose: any) => {
+    /* Check if the name and the address are set */
     if (name && address) {
+      /* Call the function to create an authorisation */
       createAuthorisation(name, address);
     }
 
+    /* Call the function to close the modal */
     onClose();
   };
 
+  /* Reach Hook called everytime data is changed */
   useEffect(() => {
+    /* Check if the name is empty - in that case return an error */
     if (name?.trim().length == 0) {
       setErrorName("Enter a valid name");
     } else {
       setErrorName("");
     }
 
+    /* Check if there is already an authorisation request with the inserted address - in that case return an error */
     if (
       rows.find(
         (authorisation: any) =>
@@ -63,7 +73,9 @@ export default function OwnerModal({
     }
   }, [name, address, rows]);
 
+  /* Function used to close the modal */
   const closeModal = () => {
+    /* Reset the modal values */
     setName(undefined);
     setAddress(undefined);
     setErrorName("");
@@ -72,6 +84,7 @@ export default function OwnerModal({
     onOpenChange();
   };
 
+  /* Return the modal JSX markup (create authorisation modal) */
   return (
     <Modal isOpen={isOpen} onOpenChange={closeModal} placement="top-center">
       <ModalContent>
