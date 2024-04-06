@@ -10,17 +10,17 @@ const HTTP_PROVIDER = config.provider_endpoint_send;
 
 /* List of contract methods with the type of action done and their arguments */
 const methods = [
-  { name: "getRole", type: "fetch", args: [] },
-  { name: "requestAuthorisation", type: "send", args: ["test"] },
-  { name: "getAuthorisation", type: "fetch", args: [] },
-  { name: "accessDoor", type: "send", args: [] },
-  { name: "getAccesses()", type: "fetch", args: [] },
-  { name: "getData", type: "fetch", args: [] },
-  { name: "createAuthorisation", type: "send", args: ["test", USER_ADDRESS] },
-  { name: "acceptAuthorisation", type: "send", args: [USER_ADDRESS] },
-  { name: "rejectAuthorisation", type: "send", args: [USER_ADDRESS] },
-  { name: "getAccesses(address)", type: "fetch", args: [USER_ADDRESS] },
-  { name: "reset", type: "send", args: [] },
+  { name: "getRole", type: "view", args: [] },
+  { name: "requestAuthorisation", type: "payable", args: ["test"] },
+  { name: "getAuthorisation", type: "view", args: [] },
+  { name: "accessDoor", type: "payable", args: [] },
+  { name: "getAccesses()", type: "view", args: [] },
+  { name: "getData", type: "view", args: [] },
+  { name: "createAuthorisation", type: "payable", args: ["test", USER_ADDRESS] },
+  { name: "acceptAuthorisation", type: "payable", args: [USER_ADDRESS] },
+  { name: "rejectAuthorisation", type: "payable", args: [USER_ADDRESS] },
+  { name: "getAccesses(address)", type: "view", args: [USER_ADDRESS] },
+  { name: "reset", type: "payable", args: [] },
 ];
 
 /* Function used to format the estimated gas and print it on screen */

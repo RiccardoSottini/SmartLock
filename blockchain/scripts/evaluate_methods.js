@@ -23,17 +23,17 @@ const getAverage = (array) =>
 
 /* List of contract methods with the type of action done and their arguments */
 const methods = [
-  { name: "getRole", type: "fetch", args: [] },
-  { name: "requestAuthorisation", type: "send", args: ["test"] },
-  { name: "getAuthorisation", type: "fetch", args: [] },
-  { name: "accessDoor", type: "send", args: [] },
-  { name: "getAccesses()", type: "fetch", args: [] },
-  { name: "getData", type: "fetch", args: [] },
-  { name: "createAuthorisation", type: "send", args: ["test", USER_ADDRESS] },
-  { name: "acceptAuthorisation", type: "send", args: [USER_ADDRESS] },
-  { name: "rejectAuthorisation", type: "send", args: [USER_ADDRESS] },
-  { name: "getAccesses(address)", type: "fetch", args: [USER_ADDRESS] },
-  { name: "reset", type: "send", args: [] },
+  { name: "getRole", type: "view", args: [] },
+  { name: "requestAuthorisation", type: "payable", args: ["test"] },
+  { name: "getAuthorisation", type: "view", args: [] },
+  { name: "accessDoor", type: "payable", args: [] },
+  { name: "getAccesses()", type: "view", args: [] },
+  { name: "getData", type: "view", args: [] },
+  { name: "createAuthorisation", type: "payable", args: ["test", USER_ADDRESS] },
+  { name: "acceptAuthorisation", type: "payable", args: [USER_ADDRESS] },
+  { name: "rejectAuthorisation", type: "payable", args: [USER_ADDRESS] },
+  { name: "getAccesses(address)", type: "view", args: [USER_ADDRESS] },
+  { name: "reset", type: "payable", args: [] },
 ];
 
 /* List of timestamp of when a method has been called and an event is retrieved */
@@ -56,7 +56,7 @@ async function send(contract, method_name, method_type, method_args) {
   /* Loop that sends a certain number of calls to the contract method */
   for (let index = 0; index < REQUESTS; index++) {
     /* Check the type of the contract method */
-    if (method_type == "send") {
+    if (method_type == "payable") {
       /* Setup a transaction calling the contract method */
       const transaction = await contract[method_name](...method_args, {
         gasLimit: MAX_GAS_FEE,
@@ -68,7 +68,7 @@ async function send(contract, method_name, method_type, method_args) {
 
       /* Wait for the transaction to be confirmed */
       await transaction.wait();
-    } else if (method_type == "fetch") {
+    } else if (method_type == "view") {
       /* Insert timestamp of when the call has been initiated */
       sentTimes.push(Date.now());
 
@@ -121,7 +121,7 @@ async function main() {
   await receive(contract_fetch);
 
   /* Setup lists with the results */
-  let sendResults = [], fetchResults = [];
+  let payableResults = [], viewResults = [];
   let results = [];
 
   /* Print the header of the program */
@@ -158,12 +158,12 @@ async function main() {
     results.push(average);
 
     /* Check the method type */
-    if (methods[methodIndex].type == "send") {
+    if (methods[methodIndex].type == "payable") {
       /* Insert the averae time in the list of results to calculate the average elapsed time for sending data */
-      sendResults.push(average);
+      payableResults.push(average);
     } else if (methods[methodIndex].type == "fetch") {
       /* Insert the averae time in the list of results to calculate the average elapsed time for fetching data */
-      fetchResults.push(average);
+      viewResults.push(average);
     }
 
     /* Print minimum - average - maximum elapsed time for the method call */
@@ -186,10 +186,10 @@ async function main() {
   /* Print the average time sending data / fetching data / all methods */
   console.log("");
   console.log(
-    "Average time for send methods: " + getAverage(sendResults).toFixed(3)
+    "Average time for payable methods: " + getAverage(payableResults).toFixed(3)
   );
   console.log(
-    "Average time for fetch methods: " + getAverage(fetchResults).toFixed(3)
+    "Average time for view methods: " + getAverage(viewResults).toFixed(3)
   );
   console.log(
     "Average time for all methods: " + getAverage(results).toFixed(3)
