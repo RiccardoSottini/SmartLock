@@ -22,16 +22,6 @@ export default function Header() {
         SmartDoor
       </a>
       <div className="navbar-nav align-items-center flex-row flex-wrap">
-        <li className="nav-item col-md-auto ml-1 mr-1">
-          <a className="nav-link ps-3 pe-3 text-dark" href="dissertation">
-            Dissertation PDF
-          </a>
-        </li>
-        <li className="nav-item col-md-auto ml-1 mr-1">
-          <a className="nav-link ps-3 pe-3 text-dark" href="installation">
-            Installation
-          </a>
-        </li>
         <li className="nav-item col-md-auto ml-1 mr-5">
           {!isConnected && (
             <button
