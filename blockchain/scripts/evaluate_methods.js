@@ -85,8 +85,7 @@ async function main() {
 
   await receive(contract_fetch);
 
-  let sendResults = [],
-    fetchResults = [];
+  let sendResults = [], fetchResults = [];
   let results = [];
 
   console.log("Evaluation based on " + REQUESTS + " calls for each method");
