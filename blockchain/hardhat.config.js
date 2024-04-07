@@ -1,4 +1,5 @@
 require("@nomiclabs/hardhat-waffle");
+require("hardhat-slither");
 
 const ENDPOINT_URL = vars.get("ENDPOINT_URL");
 const PRIVATE_KEY = vars.get("PRIVATE_KEY");

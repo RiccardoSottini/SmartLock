@@ -24,7 +24,7 @@ contract SmartDoor {
         address guest;      // address of the guest
     }
 
-    address payable owner;  // address of the contract owner
+    address payable immutable owner;  // address of the contract owner
     address[] guests;       // list of guests
 
     mapping(address => Authorisation) authorisations;   // map between guest address and its authorisation request
@@ -54,9 +54,9 @@ contract SmartDoor {
     }
 
     /* Function to request the authorisation - Guest functionality */
-    function requestAuthorisation(string memory name) public payable {
+    function requestAuthorisation(string memory name) public {
         // Check if the guest has already requested an authorisation, otherwise interrupt the function execution with an error message
-        require(authorisations[msg.sender].exists == false, "You have already requested an authorisation");
+        require(!authorisations[msg.sender].exists, "You have already requested an authorisation");
 
         // Register the authorisation request with the pending status
         authorisations[msg.sender] = Authorisation(block.timestamp, msg.sender, name, Status.PENDING, true);
@@ -79,10 +79,10 @@ contract SmartDoor {
     }
 
     /* Function to access the door - Guest functionality */
-    function accessDoor() public payable {
+    function accessDoor() public {
         // Check if the guest has an accepted authorisation, otherwise interrupt the function execution with an error message
-        require(authorisations[msg.sender].exists && authorisations[msg.sender].status == Status.ACCEPTED, "You do not have an accepted authorisation to access the door");
-
+        require(authorisations[msg.sender].exists && uint(authorisations[msg.sender].status) == uint(Status.ACCEPTED), "You do not have an accepted authorisation to access the door");
+        
         // Register the successful access to the door
         accesses[msg.sender].push(Access(block.timestamp, msg.sender));
 
@@ -128,7 +128,7 @@ contract SmartDoor {
     }
 
     /* Function to create an authorisation request - Owner functionality */
-    function createAuthorisation(string memory name, address guest) public payable {
+    function createAuthorisation(string memory name, address guest) public {
         // Check if the user is the owner and the authorisation does not exist, otherwise interrupt the function execution with an error message
         require(msg.sender == owner, "You need to be the owner of the contract");
         require(!authorisations[guest].exists, "The authorisation request already exists");
@@ -143,7 +143,7 @@ contract SmartDoor {
     }
 
     /* Function to accept an authorisation request - Owner functionality */
-    function acceptAuthorisation(address guest) public payable {
+    function acceptAuthorisation(address guest) public {
         // Check if the user is the owner, and the authorisation does not exist and is not accepted, otherwise interrupt the function execution with an error message
         require(msg.sender == owner, "You need to be the owner of the contract");
         require(authorisations[guest].exists, "The authorisation request does not exist");
@@ -158,7 +158,7 @@ contract SmartDoor {
     }
     
     /* Function to reject an authorisation request - Owner functionality */
-    function rejectAuthorisation(address guest) public payable {
+    function rejectAuthorisation(address guest) public {
         // Check if the user is the owner, and the authorisation does not exist and is not rejected, otherwise interrupt the function execution with an error message
         require(msg.sender == owner, "You need to be the owner of the contract");
         require(authorisations[guest].exists, "The authorisation request does not exist");
@@ -192,12 +192,13 @@ contract SmartDoor {
     }
 
     /* Function to reset the data stored in the contract - Owner functionality */
-    function reset() public payable {
+    function reset() public {
         // Check if the user is the owner, otherwise interrupt the function execution with an error message
         require(msg.sender == owner, "You need to be the owner of the contract");
 
         // Loop through the stored guests list and delete the associated authorisations and door accesses for each guest
-        for(uint index = 0; index < guests.length; index++) {
+        uint256 count = guests.length;
+        for(uint index = 0; index < count; index++) {
             delete authorisations[guests[index]];
             delete accesses[guests[index]];
         }

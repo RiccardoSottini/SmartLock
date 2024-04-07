@@ -64,7 +64,7 @@ async function main() {
   );
   
   /* Print the header of the program */
-  console.log("Estimation of the gas fees for each smart contract method");
+  console.log("Estimation of the gas consumption for each smart contract method");
   console.log("");
 
   /* Loop through the list of methods */
