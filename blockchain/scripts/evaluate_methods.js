@@ -24,17 +24,36 @@ const getAverage = (array) =>
 /* List of contract methods with the type of action done and their arguments */
 const methods = [
   { name: "getRole", type: "view", args: [] },
-  { name: "requestAuthorisation", type: "payable", args: ["test"] },
+  { name: "requestAuthorisation", type: "state-changing", args: ["test"] },
   { name: "getAuthorisation", type: "view", args: [] },
-  { name: "accessDoor", type: "payable", args: [] },
+  { name: "accessDoor", type: "state-changing", args: [] },
   { name: "getAccesses()", type: "view", args: [] },
   { name: "getData", type: "view", args: [] },
-  { name: "createAuthorisation", type: "payable", args: ["test", USER_ADDRESS] },
-  { name: "acceptAuthorisation", type: "payable", args: [USER_ADDRESS] },
-  { name: "rejectAuthorisation", type: "payable", args: [USER_ADDRESS] },
+  { name: "createAuthorisation", type: "state-changing", args: ["test", USER_ADDRESS] },
+  { name: "acceptAuthorisation", type: "state-changing", args: [USER_ADDRESS] },
+  { name: "rejectAuthorisation", type: "state-changing", args: [USER_ADDRESS] },
   { name: "getAccesses(address)", type: "view", args: [USER_ADDRESS] },
-  { name: "reset", type: "payable", args: [] },
+  { name: "reset", type: "state-changing", args: [] },
 ];
+
+/* Function used to format the measurement and print it on screen */
+function print(method_name, method_type, value, offset) {
+  /* Format the label */
+  let label = "Minimum - Average - Maximum time for '" + method_name + "' (" + method_type + "): ";
+  const pad_space = offset - value.length;
+
+  /* Print the label and the value */
+  console.log(label.padEnd(pad_space) + value);
+}
+
+/* Function used to format a result and print it on screen */
+function print_result(label, value, offset) {
+  /* Calculate padding */
+  const pad_space = offset - value.length;
+
+  /* Print the label and the value */
+  console.log(label.padEnd(pad_space) + value);
+}
 
 /* List of timestamp of when a method has been called and an event is retrieved */
 let receivedTimes = [], sentTimes = [];
@@ -56,7 +75,7 @@ async function send(contract, method_name, method_type, method_args) {
   /* Loop that sends a certain number of calls to the contract method */
   for (let index = 0; index < REQUESTS; index++) {
     /* Check the type of the contract method */
-    if (method_type == "payable") {
+    if (method_type == "state-changing") {
       /* Setup a transaction calling the contract method */
       const transaction = await contract[method_name](...method_args, {
         gasLimit: MAX_GAS_FEE,
@@ -126,6 +145,7 @@ async function main() {
 
   /* Print the header of the program */
   console.log("Evaluation based on " + REQUESTS + " calls for each method");
+  console.log("");
 
   /* Loop through the list of methods */
   for (let methodIndex = 0; methodIndex < methods.length; methodIndex++) {
@@ -158,7 +178,7 @@ async function main() {
     results.push(average);
 
     /* Check the method type */
-    if (methods[methodIndex].type == "payable") {
+    if (methods[methodIndex].type == "state-changing") {
       /* Insert the averae time in the list of results to calculate the average elapsed time for sending data */
       payableResults.push(average);
     } else if (methods[methodIndex].type == "fetch") {
@@ -167,15 +187,12 @@ async function main() {
     }
 
     /* Print minimum - average - maximum elapsed time for the method call */
-    console.log(
-      "Minimum - Average - Maximum time for '" +
-        methods[methodIndex].name +
-        "': " +
-        minimum.toFixed(3) +
-        " - " +
-        +average.toFixed(3) +
-        " - " +
-        +maximum.toFixed(3)
+    const value = minimum.toFixed(3) + " - " + average.toFixed(3) + " - " + maximum.toFixed(3);
+    print(
+      methods[methodIndex].name, 
+      methods[methodIndex].type,
+      value,
+      100
     );
 
     /* Reset the list of timestamps */
@@ -185,15 +202,9 @@ async function main() {
 
   /* Print the average time sending data / fetching data / all methods */
   console.log("");
-  console.log(
-    "Average time for payable methods: " + getAverage(payableResults).toFixed(3)
-  );
-  console.log(
-    "Average time for view methods: " + getAverage(viewResults).toFixed(3)
-  );
-  console.log(
-    "Average time for all methods: " + getAverage(results).toFixed(3)
-  );
+  print_result("Average time for state-changing methods: ", getAverage(payableResults).toFixed(3), 48);
+  print_result("Average time for view methods: ", getAverage(viewResults).toFixed(3), 48);
+  print_result("Average time for all methods: ", getAverage(results).toFixed(3), 48);
 }
 
 /* Setup the program execution - useful for HardHat */

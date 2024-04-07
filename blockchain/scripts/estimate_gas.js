@@ -11,23 +11,23 @@ const HTTP_PROVIDER = config.provider_endpoint_send;
 /* List of contract methods with the type of action done and their arguments */
 const methods = [
   { name: "getRole", type: "view", args: [] },
-  { name: "requestAuthorisation", type: "payable", args: ["test"] },
+  { name: "requestAuthorisation", type: "state-changing", args: ["test"] },
   { name: "getAuthorisation", type: "view", args: [] },
-  { name: "accessDoor", type: "payable", args: [] },
+  { name: "accessDoor", type: "state-changing", args: [] },
   { name: "getAccesses()", type: "view", args: [] },
   { name: "getData", type: "view", args: [] },
-  { name: "createAuthorisation", type: "payable", args: ["test", USER_ADDRESS] },
-  { name: "acceptAuthorisation", type: "payable", args: [USER_ADDRESS] },
-  { name: "rejectAuthorisation", type: "payable", args: [USER_ADDRESS] },
+  { name: "createAuthorisation", type: "state-changing", args: ["test", USER_ADDRESS] },
+  { name: "acceptAuthorisation", type: "state-changing", args: [USER_ADDRESS] },
+  { name: "rejectAuthorisation", type: "state-changing", args: [USER_ADDRESS] },
   { name: "getAccesses(address)", type: "view", args: [USER_ADDRESS] },
-  { name: "reset", type: "payable", args: [] },
+  { name: "reset", type: "state-changing", args: [] },
 ];
 
 /* Function used to format the estimated gas and print it on screen */
-function print(method_name, method_type, estimated_gas) {
+function print(method_name, method_type, estimated_gas, offset) {
     /* Format the label */
     let label = "Estimated gas for '" + method_name + "' (" + method_type + "): ";
-    const pad_space = 54 + 6 - estimated_gas.length;
+    const pad_space = offset - estimated_gas.length;
 
     /* Print the label and the estimated gas */
     console.log(label.padEnd(pad_space) + estimated_gas);
@@ -40,7 +40,7 @@ async function estimate(contract, method_name, method_type, method_args) {
     const estimated_gas = await contract.estimateGas[method_name](...method_args);
 
     /* Call the function to print the estimation */
-    print(method_name, method_type, estimated_gas.toString());
+    print(method_name, method_type, estimated_gas.toString(), 65);
   } catch (error) {
     /* Print that the transaction failed */
     console.error("Transaction failed: ", error);
