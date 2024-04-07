@@ -181,7 +181,7 @@ async function main() {
     if (methods[methodIndex].type == "state-changing") {
       /* Insert the averae time in the list of results to calculate the average elapsed time for sending data */
       payableResults.push(average);
-    } else if (methods[methodIndex].type == "fetch") {
+    } else if (methods[methodIndex].type == "view") {
       /* Insert the averae time in the list of results to calculate the average elapsed time for fetching data */
       viewResults.push(average);
     }

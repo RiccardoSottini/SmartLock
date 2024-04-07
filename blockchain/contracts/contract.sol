@@ -70,7 +70,7 @@ contract SmartDoor {
     /* Function to retrieve the authorisation - Guest functionality */
     function getAuthorisation() public view returns (Authorisation memory) {
         // Check if the authorisation exists and it is not null, in that case return the guest's authorisation
-        if(authorisations[msg.sender].exists && authorisations[msg.sender].status != Status.NULL) {
+        if(authorisations[msg.sender].exists && uint(authorisations[msg.sender].status) != uint(Status.NULL)) {
             return authorisations[msg.sender];
         }
 
@@ -147,7 +147,7 @@ contract SmartDoor {
         // Check if the user is the owner, and the authorisation does not exist and is not accepted, otherwise interrupt the function execution with an error message
         require(msg.sender == owner, "You need to be the owner of the contract");
         require(authorisations[guest].exists, "The authorisation request does not exist");
-        require(authorisations[guest].exists && authorisations[guest].status != Status.ACCEPTED, "The authorisation request has already been accepted");
+        require(authorisations[guest].exists && uint(authorisations[guest].status) != uint(Status.ACCEPTED), "The authorisation request has already been accepted");
 
         // Change the authorisation status to ACCEPTED
         authorisations[guest].status = Status.ACCEPTED;
@@ -162,7 +162,7 @@ contract SmartDoor {
         // Check if the user is the owner, and the authorisation does not exist and is not rejected, otherwise interrupt the function execution with an error message
         require(msg.sender == owner, "You need to be the owner of the contract");
         require(authorisations[guest].exists, "The authorisation request does not exist");
-        require(authorisations[guest].exists && authorisations[guest].status != Status.REJECTED, "The authorisation request has already been rejected");
+        require(authorisations[guest].exists && uint(authorisations[guest].status) != uint(Status.REJECTED), "The authorisation request has already been rejected");
 
         // Change the authorisation status to REJECTED
         authorisations[guest].status = Status.REJECTED;
