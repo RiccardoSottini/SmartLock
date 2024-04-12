@@ -4,3 +4,4 @@ artifacts
 includes/config.json
 slither.db.json
 .vscode
+UML.svg
