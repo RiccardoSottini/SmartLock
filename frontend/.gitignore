@@ -32,6 +32,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-#/src/app/includes/config.json
+/src/app/includes/config.json
 
 .vercel
