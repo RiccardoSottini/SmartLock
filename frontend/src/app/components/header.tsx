@@ -17,9 +17,9 @@ export default function Header() {
       <a
         className="navbar-brand ml-5 text-dark font-weight-bold"
         href=""
-        aria-label="SmartDoor"
+        aria-label="Smart Lock"
       >
-        SmartDoor
+        SmartLock
       </a>
       <div className="navbar-nav align-items-center flex-row flex-wrap">
         <li className="nav-item col-md-auto ml-1 mr-5">

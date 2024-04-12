@@ -5,8 +5,8 @@ async function main() {
 
   console.log("Deploying contracts with the account:", deployer.address);
 
-  const SmartDoor = await ethers.getContractFactory("SmartDoor");
-  const contract = await SmartDoor.deploy({ gasPrice: GAS_PRICE });
+  const SmartLock = await ethers.getContractFactory("SmartLock");
+  const contract = await SmartLock.deploy({ gasPrice: GAS_PRICE });
 
   console.log("Contract deployed at:", contract.address);
 }

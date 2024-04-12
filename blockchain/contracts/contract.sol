@@ -2,7 +2,7 @@
 pragma solidity ^0.8.18;
 
 // Definition of the Contract interface
-contract SmartDoor {
+contract SmartLock {
     /* Enumeration with the roles of the user */
     enum Role { NULL, OWNER, GUEST }
 
